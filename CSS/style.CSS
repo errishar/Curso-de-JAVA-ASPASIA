@@ -14,13 +14,13 @@ html {
 }
 
 /*BODY Estilo generales de todas la pagina*/
-body{
+body {
     /*Tipo de letra que se utiliza en toda la web*/
     font-family: Arial, Helvetica, sans-serif;
     /*Elimina el margen que pone el navegador por defecto*/
     margin:0;
     /*Color de fondo de la pagina*/
-    background-color: #e9eee4;
+    background-color: #7ed9f0;
 }
 
 /*Estilos de HEADER*/
@@ -34,18 +34,19 @@ header {
 }
 
 /*Estilos de NAV*/
-nav{
+
+nav {
     width: 100%; /*ancho pantalla 100%*/
     height: 70px; /*alto fijo de 70px*/
-    background-color: paleturquoise;
+    background-color: rgb(10, 161, 161);
     border: 2px solid grey;
     text-align: center;
     padding: 0.75rem;/*0.75=15px*/
 }
     
 
-nav a{
-    color: black;
+nav a {
+    color: rgb(228, 17, 17);
     text-decoration: none; /* Quita el subrayado feo por defecto */
     margin: 1rem;          /* Corregido: sin espacio entre el 1 y rem */
     padding: 0.5rem 1rem;  /* Añade espacio interno para que el sombreado parezca un botón */
@@ -56,11 +57,11 @@ nav a{
 
 nav a:hover {
     color: white;
-    background-color: rgb(7, 112, 63);
+    background-color: rgb(114, 172, 145);
 }
 
 /*Estilos para el div*/
-.contenedor{
+div .contenedor {
     width:90%;
     margin: 1rem auto; /*1rem=20px arriba y abajo y auto centra el contenedor horizontalmente*/
     font-size: 0; /*Elimina el espacio entre los elementos inline-block*/
@@ -68,37 +69,38 @@ nav a:hover {
 
 /*Estilos para el main*/
 
-.contenedor main{
+.contenedor main {
     width: 70%;
-    height: 50vh;
+    height: 100vh;
     background-color: white;
     border: 2px solid black;
     display: inline-block; /*Permite colocar el main y el aside uno al lado del otro*/
     vertical-align: top; /*Alinea el main y el aside en la parte superior*/
     padding: 1rem;
-    font-size: 1rem;
+    font-size: 12px;
 }
+
 
 /*Estilos para el aside*/
 
-.contenedor aside{
+.contenedor aside {
     width: 30%;
-    height: 50vh;
+    height: 100vh;
     background-color: bisque;
     border: 2px solid black;
     display: inline-block; /*Permite colocar el main y el aside uno al lado del otro*/
     vertical-align: top; /*Alinea el main y el aside en la parte superior*/
     color: blue;
     padding: 1rem;
-    font-size: 1rem;
+    font-size: 12px;
 }
 
-footer{
+footer {
     background-color: rgb(219, 22, 71);
     width: 100%;
-    height: 50vh;
+    height: 120px;
     color: rgb(12, 58, 211);
     padding: 1rem;
-    font-size: 1rem;
+    font-size: 12px;
 }
 
