@@ -17,22 +17,27 @@ body{
 
 header{
     width: 100%;/*ancho pantalla 100%*/
-    height: 150px; /*alto fijo de 150px*/
-    background-color:azure;
+    height: 10rem; /*alto 10 rem*/
+    background: linear-gradient(120deg, blue, red);
+    color: white;
     border: 2px solid grey; 
     text-align: center;
     padding: 1rem;
     font-size: 2rem;
+    box-shadow: 0 4px 10px green;
 }
+
+header h1{color: yellow;}
 
 nav{
     width: 100%; /*ancho pantalla 100%*/
-    height: 70px; /*alto fijo de 70px*/
+    height: 5rem; /*alto 5rem */
     background-color: red;
     border: 2px solid grey;
     text-align: center;
     font-size: 1.5rem;
     padding: 0.75rem;/*0.75=15px*/
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
 }
 
 nav a{
@@ -43,17 +48,27 @@ nav a{
     border-radius: 4px;    /* Suaviza las esquinas del sombreado */
     cursor: pointer;
     transition: 0.3s;      /* Suaviza el cambio de color y fondo */ 
+    position: relative;
 }
 
+
+
+
+
 nav a:hover {
-    color: white;
-    background-color: rgb(207, 221, 16);}
+    color: rgb(38, 8, 204);
+    background-color: rgb(216, 140, 25);
+    box-shadow: 0 4px 10px rgb(38,8,204);}
+
+
+
 
 .contenedor{
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     width: 90%;
+    min-height: 80vh;
     height: auto;
     background-color: yellow;
     border: 2px solid grey;
@@ -65,7 +80,8 @@ nav a:hover {
 
 .contenedor main{
     width: 70%; /*ancho pantalla 100%*/
-    height: 80vh; /*alto fijo de 500px*/
+    min-height: 80vh;
+    height: auto; 
     background-color: green;
     border: 10px solid grey;
     text-align: center;
@@ -75,12 +91,16 @@ nav a:hover {
     /*vertical-align: top;*/ /*Alinea el main y el aside en la parte superior*/
 }
 
-img.bandera{max-width: auto;
-    height: 2rem;} /*doy formato a las imágenes*/
+img.bandera{
+    max-width: 20%;
+    height: auto;
+    display: block;
+    margin: 0 auto;} /*doy formato a las imágenes*/
 
 .contenedor aside{
     width: 28%; /*ancho pantalla 100%*/
-    height: 50vh; /*alto fijo de 500px*/
+    min-height: 80vh;
+    height: auto; /*alto fijo de 500px*/
     justify-content: space-between;
     background-color: #5ab406;
     border: 2px solid grey;
@@ -93,8 +113,8 @@ img.bandera{max-width: auto;
 
 
 table{
-    width: 50%;
-    height: 40vh;
+    width: 100%;
+    height: auto;
     background-color: #e9eee4;
     border: 2px solid rgb(177, 9, 107);
     text-align: center;
@@ -109,14 +129,26 @@ table{
 /* 3. Aplica el borde a las celdas para crear las líneas internas */
 table th, table td {
     border: 3px solid #1e3506; /* Borde interno más fino o de otro color */
-    padding: 8px;              /* Espaciado interno para que respire el texto */
+    padding: 8px;
+                  /* Espaciado interno para que respire el texto */
 }
 
 
 
 img {
-    max-width: auto;
-    height: 450px;} /*doy formato a las imágenes*/
+    max-width: 100%;
+    aspect-ratio: 1/1;
+    object-fit : cover;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius:  120px;
+    transition: 1s;} /*doy formato a las imágenes*/ /*doy formato a las imágenes*/
+
+img:hover{
+    transform: scale(1.13) rotate(360deg);
+}
 
 
 footer{
