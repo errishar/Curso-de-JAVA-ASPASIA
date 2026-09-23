@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corte de Manga - Impacto Horizontal</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #121212;
+            font-family: sans-serif;
+        }
+
+        .escenario {
+            position: relative;
+            width: 500px;
+            height: 400px;
+            background-color: #1e1e1e;
+            border-radius: 15px;
+            cursor: pointer;
+            overflow: hidden;
+            border: 2px solid #333;
+        }
+
+        .instrucciones {
+            position: absolute;
+            top: 25px;
+            width: 100%;
+            text-align: center;
+            color: #ff4757;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* --- BRAZO IZQUIERDO (Estructura en L) --- */
+        .hombro-izq {
+            position: absolute;
+            bottom: 100px; 
+            left: 60px;
+            width: 30px;
+            height: 30px;
+            background: #2f3542;
+            border-radius: 50%;
+            transform: rotate(0deg);
+            /* Sube el hombro 45 grados */
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* Bíceps horizontal */
+        .biceps {
+            position: absolute;
+            top: -5px;
+            left: 15px;
+            width: 120px;
+            height: 40px;
+            background-color: #ffca28;
+            border-radius: 20px;
+        }
+
+        /* Antebrazo doblado estrictamente a 90° hacia arriba */
+        .antebrazo-90 {
+            position: absolute;
+            top: -90px; 
+            right: 0;
+            width: 40px;
+            height: 120px;
+            background-color: #ffa000;
+            border-radius: 20px;
+        }
+
+        /* Puño izquierdo */
+        .punio {
+            position: absolute;
+            top: -20px;
+            left: -5px;
+            width: 50px;
+            height: 50px;
+            background-color: #ff8f00;
+            border-radius: 50%;
+        }
+
+        /* --- BRAZO DERECHO GOLPEADOR (En horizontal) --- */
+        .brazo-der-contenedor {
+            position: absolute;
+            top: 130px; /* Alineado a la altura del bíceps cuando este sube */
+            right: -200px; /* Empieza fuera de la pantalla a la derecha */
+            width: 200px;
+            height: 45px; /* Invertido: ahora es ancho y plano (horizontal) */
+            /* Desplazamiento rápido hacia la izquierda con frenazo elástico */
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+
+        .brazo-der {
+            width: 100%;
+            height: 100%;
+            background-color: #ffca28;
+            border-radius: 25px;
+            position: relative;
+        }
+
+        /* Mano abierta a la izquierda del brazo (la parte que lidera el golpe) */
+        .mano-impacto {
+            position: absolute;
+            left: -30px; /* Sobresale por el lado izquierdo para golpear de cara */
+            top: -5px;
+            width: 35px;
+            height: 55px;
+            background-color: #ff8f00;
+            border-radius: 20px 5px 5px 20px; /* Forma de palma apuntando a la izquierda */
+        }
+
+        /* Líneas de impacto justo en la zona de choque */
+        .lineas-impacto {
+            position: absolute;
+            bottom: 195px;
+            left: 140px;
+            width: 60px;
+            height: 60px;
+            opacity: 0;
+            transform: scale(0.4);
+            transition: all 0.1s ease-out;
+            pointer-events: none;
+        }
+        .linea { position: absolute; background-color: #fff; }
+        .linea-v { width: 4px; height: 20px; left: 28px; top: 0; }
+        .linea-h1 { width: 20px; height: 4px; left: 0; top: 28px; }
+        .linea-h2 { width: 20px; height: 4px; right: 0; top: 28px; }
+
+
+        /* =======================================================
+           ANIMACIÓN AL PASAR EL RATÓN (HOVER)
+           ======================================================= */
+
+        /* 1. El brazo izquierdo sube 45 grados */
+        .escenario:hover .hombro-izq {
+            transform: rotate(-45deg);
+        }
+
+        /* 2. El brazo horizontal se lanza de derecha a IZQUIERDA */
+        .escenario:hover .brazo-der-contenedor {
+            /* Se desplaza hacia la izquierda en el eje X para chocar exactamente con el bíceps alto */
+            transform: translateX(-195px); 
+            /* Espera una fracción de segundo a que el bíceps esté en posición */
+            transition-delay: 0.08s; 
+        }
+
+        /* 3. Estallido de impacto en el momento exacto del contacto */
+        .escenario:hover .lineas-impacto {
+            opacity: 1;
+            transform: scale(1.3);
+            transition-delay: 0.22s;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="escenario">
+        <div class="instrucciones">PASA EL RATÓN AQUÍ PARA EL IMPACTO HORIZONTAL</div>
+        
+        <!-- Brazo izquierdo en L (90º) -->
+        <div class="hombro-izq">
+            <div class="biceps">
+                <div class="antebrazo-90">
+                    <div class="punio"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Brazo derecho HORIZONTAL que golpea hacia la izquierda -->
+        <div class="brazo-der-contenedor">
+            <div class="brazo-der">
+                <div class="mano-impacto"></div>
+            </div>
+        </div>
+
+        <!-- Efecto visual de colisión -->
+        <div class="lineas-impacto">
+            <div class="linea linea-v"></div>
+            <div class="linea linea-h1"></div>
+            <div class="linea linea-h2"></div>
+        </div>
+    </div>
+
+</body>
+</html>
