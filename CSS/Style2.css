@@ -138,7 +138,7 @@ table th, table td {
 img {
     max-width: 100%;
     aspect-ratio: 1/1;
-    object-fit : cover;
+    object-fit : contain;
     max-width: 100%;
     height: auto;
     display: block;
@@ -157,4 +157,9 @@ footer{
     height: 50vh;
     padding: 1rem;
     font-size: 2rem;
+}
+
+footer p{
+    margin: 1rem;
+    color: #eefafa;
 }
