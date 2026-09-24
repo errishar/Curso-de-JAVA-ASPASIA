@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>JAVASCRIPT</title>
+    <!-- Cargamos Math.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <!-- Cargamos Chart.js para dibujar la gráfica -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="script.js">
 </head>
 <body>
@@ -11,31 +15,36 @@
     <h1> JAVASCRIPT</h1>
 
     <script>
-        let nombre = "María";
-        let edad=30;
-        console.log(nombre);
-        let operando=27;
-        console.log("suma", edad+operando);
-        //comentario de una línea//
-       
-       
-        /*Comentario multilinea
-        */
-       
-        alert("Empezando las Matemáticas")
-        document.write("resta = ", edad-operando);
-        document.write("multiplicación = ", edad*operando);
-        document.write("División = ", edad/operando);
-        document.write("Resto = ", edad%operando)
-       
-        const linespace=(start, stop, paso) =>
-            Array.from({length : paso }, (_,i)  => start + (i * (stop - start)) / (paso - 1));
-            
+        
+        // 1. Matriz A de dimensiones 2x3 (2 filas y 3 columnas)
+        const A = math.matrix([[1,2,3],
+            [4, 5, 6]
+        ]);
 
-        const matriz=linespace(2,3,5);
-        console.log("matriz", matriz);
+        // 2. Matriz B de dimensiones 3x2 (3 filas y 2 columnas)
+        const B = math.matrix([
+            [7, 8],
+            [9,1],
+            [2,3]
+        ]);
 
-        consolelog("matriz*2", matriz*2)
+        // 3. Multiplicamos A x B (Resultado será una matriz de 2x2)
+        const P = math.multiply(A, B);
+
+        X=math.matrix([1,2,3,4]);
+
+        resultado= math.add(math.multiply(X,2),7);
+        Y= resultado.toString();
+
+
+
+        // 4. Lo pintamos en la pantalla
+        document.write("<h3>Producto de matrices:</h3>");
+        document.write("P = " + P.toString());
+        document.write("X = " + X.toString());
+        document.write("Y = " + Y.toString());
+
+        
 
     </script>
 </body>
