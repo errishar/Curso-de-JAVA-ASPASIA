@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="script.js">
+</head>
+<body>
+
+    <h1> JAVASCRIPT</h1>
+
+    <script>
+        let nombre = "María";
+        let edad=30;
+        console.log(nombre);
+        let operando=27;
+        console.log("suma", edad+operando);
+        //comentario de una línea//
+       
+       
+        /*Comentario multilinea
+        */
+       
+        alert("Empezando las Matemáticas")
+        document.write("resta = ", edad-operando);
+        document.write("multiplicación = ", edad*operando);
+        document.write("División = ", edad/operando);
+        document.write("Resto = ", edad%operando)
+       
+        const linespace=(start, stop, paso) =>
+            Array.from({length : paso }, (_,i)  => start + (i * (stop - start)) / (paso - 1));
+            
+
+        const matriz=linespace(2,3,5);
+        console.log("matriz", matriz);
+
+        consolelog("matriz*2", matriz*2)
+
+    </script>
+</body>
+</html>
