@@ -5,18 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JAVASCRIPT</title>
     <!-- Cargamos Math.js -->
-     script src="https://jsdelivr.net">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
-    <link rel="stylesheet" href="script.js">
+    
 </head>
     
 <body>
 
-    <h1> JAVASCRIPT</h1>
-    <div style="width: 500px; margin: auto;">
-        <canvas id="miGraficaXY"></canvas>
-    </div>
+    <h1>Resultados del Análisis Estadístico Financiero</h1>
+    
+    <!-- Elementos HTML ordenados donde se inyectarán los datos -->
+    <h3>Historial de Precios:</h3>
+    <p id="precios">Generando array de precios...</p>
+    
+    <h3>Parámetros del Canal:</h3>
+    <p id="Max_min"></p>
+    
+    <h3>Media Móvil Simple (SMA 10):</h3>
+    <p id="media_movil_10"></p>
+    
+    <h3>Media Móvil Simple (SMA 30):</h3>
+    <p id="media_movil_30"></p>
+    
+    <p id="cruces"></p>
+    <p id="EMA1"></p>
+    <p id="EMA2"></p>
+    <p id="Alerta_array_menor_intervalo"></p>
 
+    <!-- CORREGIDO: El script se carga al final para asegurar que los elementos <p> ya existan -->
     <script src="js/estadistica.js"></script>
 
 </body>

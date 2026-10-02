@@ -4,25 +4,26 @@
         /*document.write("Intervalo: "+ intervalo+ "<br>");*/
         let min=20;
         let max=70;
-        document.write("Max: ", max, "<br>", "Min:", min, "<br>");
+        /*document.write("Max: ", max, "<br>", "Min:", min, "<br>");*/
+        document.getElementById("Max_min").innerHTML+=`Max: ${max} <br> Min: ${min} <br>`;
         /*const precios=Array.from({length:100}, () =>Math.floor(Math.random()*(max-min+1)+min));*/
 
         /* funcion para generar precios aleatorios en un intervalo máximo y mínimo, con con forma senoidal*/
 
-        function precio(min, max, cantidad, frecuencia){
-            /*document.write("Empezamos función precio" + "<br>");*/
-            let precios=[];
-            let precio= TruncarDecimales((min+max)/2, 2);
-            /*document.write("Precio inicial: ", precio, "<br>");*/
-            for (let i=0; i<cantidad; i++){
-                Amplitud=max-min;
-                let desfase= Math.random()*2*Math.PI;
-                precio= TruncarDecimales(Math.abs(Amplitud*Math.sin(2*Math.PI*frecuencia*i+desfase)+precio), 2);
-                /*document.write("Precio: ", precio, "<br>"); */
-                precios.push(precio);
+        function precio(min, max, cantidad, frecuencia) {
+            let precios = [];
+            let amplitud = (max - min) / 2; // Amplitud real del movimiento
+            let centro = min + amplitud;    // Punto medio del canal de precio
+
+            for (let i = 0; i < cantidad; i++) {
+                let desfase = Math.random() * 0.1; // Pequeño ruido aleatorio por ciclo
+                // Generamos una onda senoidal limpia que nunca se sale del rango min y max
+                let valorSenoidal = centro + amplitud * Math.sin(2 * Math.PI * frecuencia * (i / cantidad) + desfase);
+                let precioTruncado = TruncarDecimales(Math.abs(valorSenoidal), 2);
+                
+                precios.push(precioTruncado);
             }
             return precios;
-        
         }
 
         /* preparo una función para truncar decimales a un número determinado de decimales*/
@@ -52,7 +53,8 @@
             /*a=2/(n+1*/
             /*EMA=(precio(t)*a)+(EMA(t-1)*(1-a))*/
             if(precios.length < intervalo){
-                document.write("El array de precios es menor que el intervalo, no se puede calcular la media móvil exponencial");
+                /*document.write("El array de precios es menor que el intervalo, no se puede calcular la media móvil exponencial");*/
+                document.getElementById("Alerta_array_menor_intervalo").innerHTML+=`El array de precios es menor que el intervalo, no se puede calcular la media móvil exponencial`;
                 return; 
             }
 
@@ -101,26 +103,32 @@
 
         /*Generamos un array de precios aleatorios en un intervalo máximo y mínimo*/
         let precios=precio(30, 40, 2000, 20)
-        document.write("Precios: ", precios, "<br>", "longitud del precios: ", precios.length,  "<br>");
+        /*document.write("Precios: ", precios, "<br>", "longitud del precios: ", precios.length,  "<br>");*/
+        document.getElementById("precios").innerHTML+=`Precios: ${precios} <br> longitud del precios: ${precios.length} <br>`;
 
         /*Ejecutamos la función mediaMovil con el array de precios y el intervalo 10*/
         let intervalo = 10;
         let SMA10=mediaMovil(precios, intervalo);
-        document.write("la media móvil (SMA) de ", intervalo, " es: <br>", SMA10);
-
+        /*document.write("la media móvil (SMA) de ", intervalo, " es: <br>", SMA10);*/
+        document.getElementById("media_movil_10").innerHTML+=`la media móvil (SMA) de ${intervalo} es: <br>${SMA10}`;
 
         /*Ejecutamos la función mediaMovil con el array de precios y el intervalo 30*/
         intervalo = 30;
         let SMA30=mediaMovil(precios, intervalo);
-        document.write("la media móvil (SMA) de ", intervalo, " es: <br>", SMA30);
+        
+        document.getElementById("media_movil_30").innerHTML+=`la media móvil (SMA) de ${intervalo} es: <br>${SMA30}`;
 
 
         let cruces=detectar_cruces(SMA10, SMA30);
         for (let i=0; i<cruces.length; i++){
-            document.write("<br>Cruce ", cruces[i][1], " en el índice: ", cruces[i][0],  ", valor SMA10: ", cruces[i][2], ", ", "valor SMA30: ", cruces[i][3], "<br>");
+            /*document.write("<br>Cruce ", cruces[i][1], " en el índice: ", cruces[i][0],  ", valor SMA10: ", cruces[i][2], ", ", "valor SMA30: ", cruces[i][3], "<br>");*/
+            document.getElementById("cruces").innerHTML+=`Cruce ${cruces[i][1]}, en el índice: ${cruces[i][0]}, valor SMA10: ${cruces[i][2]}, valor SMA30: ${cruces[i][3]}<br>`;
+           
         }   
 
 
-        document.write("<br> vamos a calcular la media móvil exponencial de (EMA) ", intervalo, "<br>");
+        /*document.write("<br> vamos a calcular la media móvil exponencial de (EMA) ", intervalo, "<br>");*/
+        document.getElementById("EMA1").innerHTML+=`<br> vamos a calcular la media móvil exponencial de (EMA) ${intervalo} <br>`;
         let ema=EMA(precios, intervalo);
-        document.write("<br>la media móvil exponencial de", intervalo, " es: <br>", ema);
+        /*document.write("<br>la media móvil exponencial de", intervalo, " es: <br>", ema);*/
+        document.getElementById("EMA2").innerHTML+=`<br>la media móvil exponencial de ${intervalo} es: <br> ${ema}`;
