@@ -7,6 +7,8 @@
     <!-- Cargamos Math.js -->
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <!--Cargamos Chart.js (Para poder dibujar la gráfica) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
 </head>
     
@@ -32,8 +34,16 @@
     <p id="EMA2"></p>
     <p id="Alerta_array_menor_intervalo"></p>
 
+
+    <div style="width: 100%; max-width: 10000px; margin: auto;">
+        <canvas id="miGrafica"></canvas>
+    </div>
+
     <!-- CORREGIDO: El script se carga al final para asegurar que los elementos <p> ya existan -->
     <script src="js/estadistica.js"></script>
 
+
+
 </body>
 </html>
+

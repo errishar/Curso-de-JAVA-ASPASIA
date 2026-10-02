@@ -8,17 +8,22 @@
         document.getElementById("Max_min").innerHTML+=`Max: ${max} <br> Min: ${min} <br>`;
         /*const precios=Array.from({length:100}, () =>Math.floor(Math.random()*(max-min+1)+min));*/
 
+
+        /*FUNCIONES/*
+
+
+
         /* funcion para generar precios aleatorios en un intervalo máximo y mínimo, con con forma senoidal*/
 
         function precio(min, max, cantidad, frecuencia) {
             let precios = [];
             let amplitud = (max - min) / 2; // Amplitud real del movimiento
             let centro = min + amplitud;    // Punto medio del canal de precio
-
+            let valorSenoidal = min;
             for (let i = 0; i < cantidad; i++) {
                 let desfase = Math.random() * 0.1; // Pequeño ruido aleatorio por ciclo
                 // Generamos una onda senoidal limpia que nunca se sale del rango min y max
-                let valorSenoidal = centro + amplitud * Math.sin(2 * Math.PI * frecuencia * (i / cantidad) + desfase);
+                valorSenoidal = amplitud * Math.sin(2 * Math.PI * frecuencia * (i / cantidad) + desfase) + valorSenoidal;
                 let precioTruncado = TruncarDecimales(Math.abs(valorSenoidal), 2);
                 
                 precios.push(precioTruncado);
@@ -36,7 +41,7 @@
         function mediaMovil(array, intervalo){
             let resultado= new Array(array.length).fill(null);
             for (let i=0; i<intervalo-1; i++){
-                resultado[i]=0;
+                resultado[i]="-";
             }
             for (let i=intervalo-1; i<array.length; i++){
                 let suma=0;
@@ -80,7 +85,7 @@
             }
 
             for (let i=0; i<intervalo-1; i++){
-                emas[i]=0;
+                emas[i]="-";
             }
             return emas;
         }
@@ -101,8 +106,12 @@
         }
 
 
+
+        /*PRINCIPAL*/
+
+
         /*Generamos un array de precios aleatorios en un intervalo máximo y mínimo*/
-        let precios=precio(30, 40, 2000, 20)
+        let precios=precio(30, 40, 500, 20)
         /*document.write("Precios: ", precios, "<br>", "longitud del precios: ", precios.length,  "<br>");*/
         document.getElementById("precios").innerHTML+=`Precios: ${precios} <br> longitud del precios: ${precios.length} <br>`;
 
@@ -119,12 +128,7 @@
         document.getElementById("media_movil_30").innerHTML+=`la media móvil (SMA) de ${intervalo} es: <br>${SMA30}`;
 
 
-        let cruces=detectar_cruces(SMA10, SMA30);
-        for (let i=0; i<cruces.length; i++){
-            /*document.write("<br>Cruce ", cruces[i][1], " en el índice: ", cruces[i][0],  ", valor SMA10: ", cruces[i][2], ", ", "valor SMA30: ", cruces[i][3], "<br>");*/
-            document.getElementById("cruces").innerHTML+=`Cruce ${cruces[i][1]}, en el índice: ${cruces[i][0]}, valor SMA10: ${cruces[i][2]}, valor SMA30: ${cruces[i][3]}<br>`;
-           
-        }   
+          
 
 
         /*document.write("<br> vamos a calcular la media móvil exponencial de (EMA) ", intervalo, "<br>");*/
@@ -132,3 +136,124 @@
         let ema=EMA(precios, intervalo);
         /*document.write("<br>la media móvil exponencial de", intervalo, " es: <br>", ema);*/
         document.getElementById("EMA2").innerHTML+=`<br>la media móvil exponencial de ${intervalo} es: <br> ${ema}`;
+
+
+
+
+        /* Marcamos los puntos alcistaas y bajistas en la gráfica con un array de colores para cada punto*/
+
+        
+        let cruces=detectar_cruces(SMA10, SMA30);
+        for (let i=0; i<cruces.length; i++){
+            /*document.write("<br>Cruce ", cruces[i][1], " en el índice: ", cruces[i][0],  ", valor SMA10: ", cruces[i][2], ", ", "valor SMA30: ", cruces[i][3], "<br>");*/
+            document.getElementById("cruces").innerHTML+=`Cruce ${cruces[i][1]}, en el índice: ${cruces[i][0]}, valor SMA10: ${cruces[i][2]}, valor SMA30: ${cruces[i][3]}<br>`;
+           
+        } 
+        let alcista=[];
+        let bajista=[];
+        document.getElementById("cruces").innerHTML+=`<br>CRUCES DETECTADOS: <br>`;
+        cruces.forEach(cruce => {
+            let indice = cruce[0];
+            let tipo = cruce[1];
+
+            if (tipo === "alcista") {
+                alcista.push({x: indice, y: SMA10[indice]});
+            }
+            if (tipo === "bajista") {
+                bajista.push({x: indice, y: SMA10[indice]});
+            }
+        });
+
+
+
+
+
+
+        /*GRÁFICA*/
+
+
+
+        // Generamos un array secuencial dinámico basado en la cantidad real de precios (2000 elementos)
+        const X = Array.from({ length: precios.length }, (_, i) => i); /*EJE X (Labels)*/
+
+
+        /*CONFIGURACIÓN Y APERTURA DE CHART.JS */
+        
+        const ctx= document.getElementById("miGrafica").getContext("2d"); 
+
+        const miGrafica= new Chart(ctx, {   
+            type: "line", /* Tipo de gráfico: 'bar', 'line', 'pie', etc.*/
+            data:{
+                labels: X, /*EJE Y (Datos)*/
+                datasets:[
+                    {
+                            label: 'Precios', 
+                            data: precios, 
+                            borderColor: 'blue', 
+                            backgroundColor: 'transparent', // Evita que el relleno tape otras líneas
+                            borderWidth: 1.5,
+                            pointRadius: 0 /* Oculta los puntos individuales para que la gráfica cargue rápido con 2000 datos*/
+                        },
+
+                    {
+                            label: 'SMA10', 
+                            data: SMA10, 
+                            borderColor: 'green', 
+                            backgroundColor: 'transparent',
+                            borderWidth: 1.5,
+                            pointRadius: 0 /* Oculta los puntos individuales para que la gráfica cargue rápido con 2000 datos*/
+                        },
+
+                    {       label: 'SMA30', 
+                            data: SMA30, 
+                            borderColor: 'orange', 
+                            backgroundColor: 'transparent',
+                            borderWidth: 1.5,
+                            pointRadius: 0 /* Oculta los puntos individuales para que la gráfica cargue rápido con 2000 datos*/
+                        },
+
+                    {
+                            label: 'EMA10', 
+                            data: ema, 
+                            borderColor: 'red', 
+                            backgroundColor: 'transparent',
+                            borderWidth: 1.5,
+                            pointRadius: 0 /* Oculta los puntos individuales para que la gráfica cargue rápido con 2000 datos*/
+                        },
+                        /*Marcadores alcistas y bajistas*/
+                        {
+                            label: 'Cruces Alcistas',
+                            data: alcista,
+                            type: 'scatter',
+                            backgroundColor: 'green',
+                            borderColor: 'darkgreen',
+                            pointStyle: 'triangle', /*Triángulo para indicar cruce alcista*/
+                            pointRadius: 5,/*Tamaño grande para que se vea bien el triángulo*/
+                            rotation: 0,/*Apunta hacia arriba*/
+                            borderWidth: 2
+                        },  
+                        
+                        {
+                            label: 'Cruces Bajistas',
+                            data: bajista,
+                            type: 'scatter',
+                            backgroundColor: 'red',
+                            borderColor: 'darkred',
+                            pointStyle: 'triangle', /*Triángulo para indicar cruce alcista*/
+                            pointRadius: 5,/*Tamaño grande para que se vea bien el triángulo*/
+                            rotation: 180,/*Apunta hacia arriba*/
+                            borderWidth: 2
+                        }  
+
+                    ]
+            },
+            options:{
+                responsive: true,
+                scales:{
+                    y:{
+                        beginAtZero: false /* Al ser datos financieros entre 30 y 40, desactivar el cero hace que las ondas se aprecien perfectamente*/
+                    }
+                        }
+                    }
+                });
+    
