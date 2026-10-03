@@ -1,4 +1,4 @@
-import { cilindro_AH } from './cilindro.js';
+import { cilindro_AH, cilindro_ovalo } from './cilindro.js';
 import { linespace, simetria, aplicarLuz, calcular_X, truncarCilindro } from './calculos.js';
 import { graficarCilindroGenerico } from './grafica.js';
 
@@ -56,9 +56,69 @@ document.addEventListener("DOMContentLoaded", () => {
             • Luz aplicada: ${valorLuz} mm<br>
             • La R de laminación aplicada: ${R_AH}<br>;
             • Área de palanquilla: ${area_palanquilla.toFixed(2)} mm²<br>
-            • Área cuadrante objetivo (Area_AH): ${4*Area_AH.toFixed(2)} mm²<br>
+            • Área salida (Area_AH): ${4*Area_AH.toFixed(2)} mm²<br>
             • Ancho de la figura: ${2*x_AH.toFixed(2)} mm <br>
             • La altura máxima de la figura: ${(2 * Math.max(...Relleno_AH_cuadrante.Y)).toFixed(2)} mm <br>
+        `;
+    }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    // -------------------------------------------------------------
+    // 1. DATOS DE ENTRADA Y PARÁMETROS GEOMÉTRICOS
+    // -------------------------------------------------------------
+    
+    
+    let area_palanquilla_cuadrante = area_palanquilla / 4; // Trabajo exclusivo en 1er cuadrante
+
+    let B = 209.37;
+    let H = 39;
+    let R = 160;
+    let r = 10;
+    let n = 100;
+    let valorLuz = 15;
+    let R_BH = 1.4; // Coeficiente / relación de reducción
+
+    let Area_BH = Area_AH / R_BH; // Área objetivo del cuadrante
+
+    // -------------------------------------------------------------
+    // 2. CÁLCULOS (EXCLUSIVAMENTE EN EL PRIMER CUADRANTE)
+    // -------------------------------------------------------------
+    // A) Generar perfil base del cuadrante
+    let BH = cilindro_ovalo(n, B, H, R, r);
+    
+    // B) Aplicar luz al primer cuadrante
+    let BH_luz = aplicarLuz(BH, valorLuz);
+
+    // C) Calcular el punto de corte X correspondiente al área del cuadrante
+    let x_BH = calcular_X(BH_luz, Area_AH, 0.001);
+
+    // D) Truncar la curva del cuadrante en el valor x_AH
+    let Relleno_BH_cuadrante = truncarCilindro(BH_luz, x_BH);
+
+    // -------------------------------------------------------------
+    // 3. PREPARACIÓN PARA REPRESENTACIÓN GRÁFICA (APLICAR SIMETRÍA)
+    // -------------------------------------------------------------
+    // Generamos el espejo simétrico únicamente para enviar a la gráfica
+    let BH_sim = simetria(BH_luz);
+    let Relleno_BH_sim = simetria(Relleno_BH_cuadrante);
+
+    // Renderizado en el Canvas de Chart.js
+    graficarCilindroGenerico(BH_sim, Relleno_BH_sim);
+
+    // -------------------------------------------------------------
+    // 4. SALIDA DE DATOS EN EL DOM
+    // -------------------------------------------------------------
+    const contenedor = document.getElementById("BH_luz");
+    if (contenedor) {
+        contenedor.innerHTML = `
+            <strong>Resultados del cálculo (1er Cuadrante):</strong><br>
+            • Luz aplicada: ${valorLuz} mm<br>
+            • La R de laminación aplicada: ${R_BH}<br>;
+            • Área de entrada: ${Area_AH.toFixed(2)} mm²<br>
+            • Área salida (Area_BH): ${4*Area_AH.toFixed(2)} mm²<br>
+            • Ancho de la figura: ${2*x_BH.toFixed(2)} mm <br>
+            • La altura máxima de la figura: ${(2 * Math.max(...Relleno_BH_cuadrante.Y)).toFixed(2)} mm <br>
         `;
     }
 });

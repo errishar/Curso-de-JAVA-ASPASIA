@@ -27,7 +27,7 @@ export function cilindro_AH(n, B, H, R, r, a) {
     let xt5 = (B / 2) + 30;
     let yt5 = 0;
 
-    n = Math.max(n, Math.trunc(B));
+    n = Math.max(n, Math.trunc(B/2));
 
     let X1 = linespace(0, xt1, n);
     let Y1 = X1.map(() => yt1);
@@ -57,12 +57,37 @@ export function cilindro_AH(n, B, H, R, r, a) {
 }
 
 
-export cilindro_ovalo(n, B, H, R, r){
+export function cilindro_ovalo(n, B, H, R, r){
+    /*Centros*/
     let x_cR = 0;
     let y_cR = H - R;
     let x_cr = B / 2 - r;
-    let y_cr = 0;
-    
+    let y_cr = r;
+
+    /* tangentes que delimitan las ecuaciones*/
+    let xt1=x_cR+(x_cr-x_cR)*R/(R+r);
+    let yt1=y_cR+(y_cr-y_cR)*R/(R+r);
+    let xt2=B/2*(1+r/R);
+    let yt2=0;
+
+
+    /*creación de la matriz del primer cuadrante*/
+    n = Math.max(n, Math.trunc(B/2));
+
     let X1 = linespace(0, xt1, n);
+    let Y1 = X1.map(x => {
+        let val = Math.pow(R, 2)-Math.pow(x, 2);
+        return  Math.sqrt(Math.max(0, val))-y_cR});
     
-}
+    let X2 = linespace(xt1, xt2, n);
+    let Y2 = X1.map(x => {
+        let val = Math.pow(r, 2)-Math.pow((x-x_cr), 2);
+        return  Math.sqrt(Math.max(0, val))+r});
+    
+    /*concatenamos y cerramos*/
+    
+        return {
+        X: [].concat(X1, X2),
+        Y: [].concat(Y1, Y2)}
+    
+    }
