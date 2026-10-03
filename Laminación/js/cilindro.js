@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1. Obtener coordenadas base
     let AH = cilindro_AH(n, B, H, R, r, a);
     let AH_luz = aplicarLuz(AH, valorLuz);
-    let AH_sim = simetria(AH);
+    let AH_sim = simetria(AH_luz);
     
     // 2. Crear el objeto cilindro genérico con sus coordenadas
     /*let AH_luz = aplicarLuz(AH_sim, valorLuz);*/
