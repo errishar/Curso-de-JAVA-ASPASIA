@@ -1,59 +1,67 @@
 /* cilindro.js*/
 import { linespace } from './calculos.js';
 
-export function cilindro_AH(n, B, H, R, r, a) {
-    let a_rad = (a / 180) * Math.PI;
 
-    let x_cr = B / 2;
+export function cilindro_AH(n, B, H, R, r, a_deg) {
+    let factor= 0.25
+    
+    let a_rad = (a_deg * Math.PI) / 180;             // 12° en radianes
+    let beta_rad = ((90 - a_deg) * Math.PI) / 180;   // 78° (90° - 12°) en radianes
+    let half_B = B / 2;
+
+    // 1. Centro del arco inferior r
+    let x_cr = half_B ;
     let y_cr = r;
 
-    let dy = H - R - r;
-    let dx = dy * Math.tan(a_rad) + (R + r) / Math.cos(a_rad);
-    let x_cR = x_cr - dx;
+    // 2. Punto exacto de inicio de r (Tangencia a 78° con la recta T3)
+    let x3_fin = x_cr - r * Math.sin(a_rad);          // B/2 - r + r*sin(12°)
+    let y_tan_r = y_cr - r * Math.cos(a_rad);         // r - r*cos(12°)
+
+    // 3. Geometría del arco superior R
     let y_cR = H - R;
+    let y_tan_R = y_cR + R * Math.cos(a_rad);
+    
+    // Distancia horizontal entre tangencias usando la pendiente a 12°
+    let delta_y = y_tan_R - y_tan_r;
+    let delta_x = delta_y * Math.tan(a_rad);
 
-    let xt1 = x_cR;
-    let yt1 = H;
+    let x2_fin = x3_fin - delta_x;
+    let x_cR = x2_fin - R * Math.sin(a_rad);
+    if (x_cR < 0) x_cR = 0;
 
-    let xt2 = x_cR + R * Math.sin(a_rad);
-    let yt2 = y_cR + R * Math.cos(a_rad);
+    let x1_fin = x_cR;
+    let n_puntos = Math.floor(n* factor);
 
-    let xt3 = x_cr - r * Math.sin(a_rad);
-    let yt3 = y_cr - r * Math.cos(a_rad);
+    // --- TRAMO 1: Parte plana superior (Y = H) ---
+    let X1 = linespace(0, x1_fin, n_puntos);
+    let Y1 = X1.map(() => H);
 
-    let xt4 = x_cr;
-    let yt4 = 0;
+    // --- TRAMO 2: Arco de empalme R ---
+    let X2 = linespace(x1_fin, x2_fin, n_puntos);
+    let Y2 = X2.map(x => y_cR + Math.sqrt(Math.max(0, Math.pow(R, 2) - Math.pow(x - x_cR, 2))));
 
-    let xt5 = (B / 2) + 30;
-    let yt5 = 0;
-
-    n = Math.max(n, Math.trunc(B/2));
-
-    let X1 = linespace(0, xt1, n);
-    let Y1 = X1.map(() => yt1);
-
-    let X2 = linespace(xt1, xt2, n);
-    let Y2 = X2.map(x => {
-        let val = R * R - Math.pow(x - x_cR, 2);
-        return y_cR + Math.sqrt(Math.max(0, val));
+    // --- TRAMO 3: Recta inclinada (Une las tangencias de R a 12° y r a 78°) ---
+    let X3 = linespace(x2_fin, x3_fin, n_puntos);
+    let Y3 = X3.map(x => {
+        let t = (x - x2_fin) / (x3_fin - x2_fin);
+        return y_tan_R - t * delta_y;
     });
 
-    let X3 = linespace(xt2, xt3, n);
-    let Y3 = X3.map(x => yt2 + (yt3 - yt2) * ((x - xt2) / (xt3 - xt2)));
-
-    let X4 = linespace(xt3, xt4, n);
+    // --- TRAMO 4: Arco r desde el punto de tangencia a 78° hasta (B/2, 0) ---
+    let X4 = linespace(x3_fin, half_B, n_puntos);
     let Y4 = X4.map(x => {
-        let val = r * r - Math.pow(x - x_cr, 2);
+        let val = Math.pow(r, 2) - Math.pow(x - x_cr, 2);
         return y_cr - Math.sqrt(Math.max(0, val));
     });
 
-    let X5 = linespace(xt4, xt5, n);
-    let Y5 = X5.map(() => yt5);
+    // --- TRAMO 5: Cuello plano exterior a nivel Y = 0 (de B/2 en adelante) ---
+    let X5 = linespace(half_B, half_B + 15, Math.floor(n_puntos * factor));
+    let Y5 = X5.map(() => 0);
 
-    return {
-        X: [].concat(X1, X2, X3, X4, X5),
-        Y: [].concat(Y1, Y2, Y3, Y4, Y5)
-    };
+    let X = [].concat(X1, X2, X3, X4, X5);
+    let Y = [].concat(Y1, Y2, Y3, Y4, Y5);
+
+    return { X: X, Y: Y };
 }
 
 

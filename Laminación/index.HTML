@@ -10,36 +10,54 @@
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<style>
+
+    <style>
         body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-    }
-    .contenedor-grafica {
-        width: 80%;
-        max-width: 900px;
-        min-height: 400px; /* <--- Añade esto */
-        margin: 0 auto;
-        position: relative; /* <--- Recomendado para Chart.js */
-    }
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f8f9fa;
+        }
+        .cilindro-card {
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 800px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .tabla-cilindro {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .tabla-cilindro th, .tabla-cilindro td {
+            border: 1px solid #dee2e6;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        .tabla-cilindro th {
+            background-color: #007bff;
+            color: white;
+        }
+        .grafica-container {
+            width: 100%;
+            max-width: 750px;
+            margin: 0 auto;
+        }
     </style>
+</head>
 <body>
-<header>
+    <header>
         <h2>Análisis de Perfil de Laminación</h2>
     </header>
 
-
     <main>
-        <p id="BH_luz"></p>
-
-        <div class="contenedor-grafica">
-            <canvas id="AH_graf"></canvas>
-        </div>
+        <!-- CONTENEDOR REQUERIDO POR GRAFICA.JS -->
+        <div id="contenedor-tablas"></div>
     </main>
 
     <!-- Carga del script principal -->
     <script type="module" src="./js/lamina.js"></script>
 </body>
 </html>
-
