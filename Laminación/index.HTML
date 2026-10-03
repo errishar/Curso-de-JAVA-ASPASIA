@@ -11,16 +11,35 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+<style>
+        body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+    .contenedor-grafica {
+        width: 80%;
+        max-width: 900px;
+        min-height: 400px; /* <--- Añade esto */
+        margin: 0 auto;
+        position: relative; /* <--- Recomendado para Chart.js */
+    }
+    </style>
 <body>
+<header>
+        <h2>Análisis de Perfil de Laminación</h2>
+    </header>
 
-    <div style="width: 90%; max-width: 1000px; margin: 20px auto;">
-        <canvas id="AH_graf"></canvas>
-    </div>
 
-    <p id="AH"></p>
+    <main>
+        <p id="AH_luz"></p>
 
-    <!-- Carga de la lógica JS -->
-    <script type="module" src="js/cilindro.js"></script>
+        <div class="contenedor-grafica">
+            <canvas id="AH_graf"></canvas>
+        </div>
+    </main>
+
+    <!-- Carga del script principal -->
+    <script type="module" src="./js/lamina.js"></script>
 </body>
 </html>
 
