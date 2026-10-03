@@ -57,37 +57,79 @@ export function cilindro_AH(n, B, H, R, r, a) {
 }
 
 
-export function cilindro_ovalo(n, B, H, R, r){
-    /*Centros*/
-    let x_cR = 0;
-    let y_cR = H - R;
-    let x_cr = B / 2 - r;
-    let y_cr = r;
+export function cilindro_ovalo(n, B, H, R, r_fijo) {
+    n = Math.max(n, 25);
+    let x_final = B / 2.0;
 
-    /* tangentes que delimitan las ecuaciones*/
-    let xt1=x_cR+(x_cr-x_cR)*R/(R+r);
-    let yt1=y_cR+(y_cr-y_cR)*R/(R+r);
-    let xt2=B/2*(1+r/R);
-    let yt2=0;
-
-
-    /*creación de la matriz del primer cuadrante*/
-    n = Math.max(n, Math.trunc(B/2));
-
-    let X1 = linespace(0, xt1, n);
-    let Y1 = X1.map(x => {
-        let val = Math.pow(R, 2)-Math.pow(x, 2);
-        return  Math.sqrt(Math.max(0, val))-y_cR});
-    
-    let X2 = linespace(xt1, xt2, n);
-    let Y2 = X1.map(x => {
-        let val = Math.pow(r, 2)-Math.pow((x-x_cr), 2);
-        return  Math.sqrt(Math.max(0, val))+r});
-    
-    /*concatenamos y cerramos*/
-    
-        return {
-        X: [].concat(X1, X2),
-        Y: [].concat(Y1, Y2)}
-    
+    // 1. Control de seguridad geométrica
+    if (R < x_final) {
+        R = x_final + 0.1;
     }
+
+    // 2. Cálculo del ángulo alfa y del punto de tangencia
+    let sin_alfa = Math.min(Math.max(x_final / R, 0.0), 1.0); // Equivalente a np.clip
+    let alfa = Math.asin(sin_alfa);
+    let cos_alfa = Math.cos(alfa);
+
+    // Coordenadas exactas del punto de tangencia
+    let xt = x_final;
+    let yt = R * cos_alfa - (R - H);
+
+    // 3. Despeje analítico del radio dependiente 'r' de suavizado
+    let divisor_r = 1.0 - cos_alfa;
+    if (Math.abs(divisor_r) < 1e-6) {
+        divisor_r = 1e-6;
+    }
+
+    let r_calculado = yt / divisor_r;
+    r_calculado = Math.max(0.5, r_calculado); // Evitar colapsos a cero
+
+    // 4. Determinación de los centros de los arcos
+    let xc1 = 0;
+    let yc1 = H - R;
+
+    let xc2 = (R + r_calculado) * sin_alfa;
+    let yc2 = r_calculado;
+
+    // 5. CONSTRUCCIÓN DE LA MATRIZ DE PUNTOS (Primer Cuadrante)
+    // Tramo 1: Arco Mayor (desde X=0 hasta la tangencia xt)
+    let X1 = linespace(0, xt, n);
+    let Y1 = X1.map(x => {
+        let val = Math.pow(R, 2) - Math.pow(x, 2);
+        return yc1 + Math.sqrt(Math.max(0.0, val));
+    });
+
+    // Tramo 2: Arco Menor (desde xt hasta el limite exterior xc2)
+    let x_limite_exterior = xc2;
+    let X2 = linespace(xt, x_limite_exterior, n);
+    let Y2 = X2.map(x => {
+        let val = Math.pow(r_calculado, 2) - Math.pow(x - xc2, 2);
+        return yc2 - Math.sqrt(Math.max(0.0, val));
+    });
+
+    // Combinamos las curvas en una sola matriz continua
+    let Xi = [].concat(X1, X2);
+    let Yi = [].concat(Y1, Y2);
+
+    // 6. FILTRADO Y AJUSTE MILIMÉTRICO DE EXTREMOS
+    let Xi_filt = [];
+    let Yi_filt = [];
+
+    for (let i = 0; i < Xi.length; i++) {
+        if (Xi[i] >= 0 && Yi[i] >= 0 && Yi[i] <= H) {
+            Xi_filt.push(Xi[i]);
+            Yi_filt.push(Yi[i]);
+        }
+    }
+
+    if (Xi_filt.length > 0) {
+        Yi_filt[0] = H; // Cresta inicial en X=0
+        Xi_filt[Xi_filt.length - 1] = x_limite_exterior;
+        Yi_filt[Yi_filt.length - 1] = 0.0; // Muere en cota cero
+    }
+
+    return {
+        X: Xi_filt,
+        Y: Yi_filt
+    };
+}
