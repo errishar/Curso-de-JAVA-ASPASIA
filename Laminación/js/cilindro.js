@@ -141,3 +141,45 @@ export function cilindro_ovalo(n, B, H, R, r_fijo) {
         Y: Yi_filt
     };
 }
+
+
+export function cilindro_redondo(n = 100, B = 120.09, H = 49, R = 55, r = 8, a = 30) {
+    let alfa = (a * Math.PI) / 180; // Ángulo de inclinación en radianes (30°)
+    n = Math.max(n, Math.trunc(B / 2));
+
+    /* 1. TÉRMINO GEOMÉTRICO DE TRANSLACIÓN */
+    let term_recta = ((H - R) + R * Math.sin(alfa) - r * (1 - Math.sin(alfa))) / Math.tan((Math.PI / 2) - alfa);
+
+    /* 2. PUNTOS CRÍTICOS EN X DE TANGENCIA */
+    let x_T1 = 0.0;
+    let x_T2 = -R * Math.cos(alfa);
+    let x_T3 = x_T2 - term_recta;
+    let x_T4 = -B / 2; // Extremo de la base exacto
+
+    /* 3. CENTRO DEL ARCO DE ACUERDO LATERAL r */
+    let cx_C2 = -term_recta - (R + r) * Math.cos(alfa);
+
+    /* 4. MUESTREO Y ECUACIONES DE LOS TRAMOS */
+
+    // Tramo 1: Arco Superior Central (de x_T1 a x_T2)
+    let X1 = linespace(x_T1, x_T2, n);
+    let Y1 = X1.map(x => (H - R) + Math.sqrt(Math.max(0, Math.pow(R, 2) - Math.pow(x, 2))));
+
+    // Tramo 2: Recta Inclinada de Transición (de x_T2 a x_T3)
+    let X2 = linespace(x_T2, x_T3, n);
+    let Y2 = X2.map(x => (H - R) + R * Math.sin(alfa) + Math.tan((Math.PI / 2) - alfa) * (x + R * Math.cos(alfa)));
+
+    // Tramo 3: Arco Inferior de Esquina r (de x_T3 a x_T4 en orden ordenado para Chart.js)
+    let X3 = linespace(x_T3, x_T4, n);
+    let Y3 = X3.map(x => r - Math.sqrt(Math.max(0, Math.pow(r, 2) - Math.pow(x - cx_C2, 2))));
+
+    /* 5. UNIÓN Y APLICACIÓN DE SIGNOS */
+    let Xi = [].concat(X1, X2, X3);
+    let Yi = [].concat(Y1, Y2, Y3);
+
+    // Mapeamos -Xi para orientar las coordenadas al cuadrante correcto
+    return {
+        X: Xi.map(x => -x),
+        Y: Yi
+    };
+}

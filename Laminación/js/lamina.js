@@ -1,4 +1,4 @@
-import { cilindro_AH, cilindro_ovalo } from './cilindro.js';
+import { cilindro_AH, cilindro_ovalo, cilindro_redondo } from './cilindro.js';
 import { aplicarLuz, simetria, truncarRelleno } from './calculos.js';
 import { graficarCilindroGenerico } from './grafica.js';
 
@@ -36,8 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
             R_transfor: 1.5
         },
         {
-            id: "Cv",
-            nombre: "Pasada 2 - Perfil óvalo",
+            id: "BH",
+            nombre: "Pasada 2ª - Perfil óvalo",
             tipo: "ovalo",
             B: 209.37,
             H: 39,
@@ -47,7 +47,20 @@ document.addEventListener("DOMContentLoaded", () => {
             n: 100,
             Valor_luz: 10,
             R_transfor: 1.5
-        }
+        },
+        {
+            id: "CV", /*(n = 100, B = 120.09, H = 49, R = 55, r = 8, a = 30)*/
+            nombre: "Pasada 3ª - Perfil CV",
+            tipo: "redondo",
+            B: 120.09,
+            H: 49,
+            R: 55,
+            r: 8,
+            a: 30,
+            n: 100,
+            Valor_luz: 10,
+            R_transfor: 1.5
+        },
     ];
 
     const contenedor = document.getElementById("contenedor-tablas");
@@ -69,8 +82,10 @@ document.addEventListener("DOMContentLoaded", () => {
         let perfilCuadrante;
         if (p.tipo === "AH") {
             perfilCuadrante = cilindro_AH(p.n, p.B, p.H, p.R, p.r, p.a);
-        } else {
+        } else if (p.tipo === "ovalo"){
             perfilCuadrante = cilindro_ovalo(p.n, p.B, p.H, p.R, p.r);
+        } else if (p.tipo === "redondo"){
+            perfilCuadrante = cilindro_redondo(p.n, p.B, p.H, p.R, p.r, p.a) /*(n = 100, B = 120.09, H = 49, R = 55, r = 8, a = 30)*/
         }
 
         // --- 2. Aplicar la luz (+luz/2 en Y) ---
@@ -109,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <!-- Letrero de datos de la pasada -->
                     <div class="datos-pasada-card" style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; min-width: 230px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                         <h3 style="margin-top: 0; font-size: 1.1em; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 5px;">Datos de la Pasada</h3>
-                        <p style="margin: 8px 0;"><strong>ID Pasada:</strong> <span>${p.id}</span></p>
+                        <p style="margin: 8px 0;"><strong>Caja:</strong> <span>${p.id}</span></p>
                         <p style="margin: 8px 0;"><strong>Tipo Cilindro:</strong> <span>${tipoCilindro}</span></p>
                         <p style="margin: 8px 0;"><strong>Área Entrada:</strong> <span>${areaEntradaFmt} mm²</span></p>
                         <p style="margin: 8px 0;"><strong>Área Salida:</strong> <span>${areaSalidaFmt} mm²</span></p>
