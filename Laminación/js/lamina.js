@@ -1,8 +1,7 @@
-import { cilindro_AH, cilindro_ovalo, cilindro_redondo } from './cilindro.js';
+import { cilindro_AH, cilindro_ovalo, cilindro_redondo, cilindro_C1 } from './cilindro.js';
 import { aplicarLuz, simetria, truncarRelleno } from './calculos.js';
 import { graficarCilindroGenerico } from './grafica.js';
 
-// Función para calcular el punto de corte X donde la curva encierra el área deseada
 function calcular_X(perfil, areaObjetivo) {
     let areaAcumulada = 0;
     for (let i = 1; i < perfil.X.length; i++) {
@@ -20,11 +19,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let palanquilla = 150;
     let area_palanquilla_cuadrante = Math.pow(palanquilla, 2) / 4; // 5625 mm² (por cuadrante)
 
-    // Definición de la secuencia de pasadas
     const pasadas = [
         {
             id: "AH",
-            nombre: "Pasada 1 - Perfil AH",
+            nombre: "Pasada 1 - Caja AH",
             tipo: "AH",
             B: 180.0,
             H: 46,
@@ -32,12 +30,12 @@ document.addEventListener("DOMContentLoaded", () => {
             r: 8,
             a: 12,
             n: 100,
-            Valor_luz: 20,
+            Valor_luz: 10,
             R_transfor: 1.5
         },
         {
             id: "BH",
-            nombre: "Pasada 2ª - Perfil óvalo",
+            nombre: "Pasada 2ª - Caja óvalo",
             tipo: "ovalo",
             B: 209.37,
             H: 39,
@@ -45,12 +43,12 @@ document.addEventListener("DOMContentLoaded", () => {
             r: 10,
             a: 0,
             n: 100,
-            Valor_luz: 10,
+            Valor_luz: 5,
             R_transfor: 1.5
         },
         {
-            id: "CV", /*(n = 100, B = 120.09, H = 49, R = 55, r = 8, a = 30)*/
-            nombre: "Pasada 3ª - Perfil CV",
+            id: "CV",
+            nombre: "Pasada 3ª - Caja CV",
             tipo: "redondo",
             B: 120.09,
             H: 49,
@@ -58,54 +56,60 @@ document.addEventListener("DOMContentLoaded", () => {
             r: 8,
             a: 30,
             n: 100,
-            Valor_luz: 10,
+            Valor_luz: 5,
             R_transfor: 1.5
         },
+        {
+            id: "C1",
+            nombre: "Pasada 4ª - Caja C1",
+            tipo: "C1",
+            B: 140,
+            H: 35,
+            R1: 160,
+            R2: 40,
+            r: 8,
+            a: 0,
+            n: 100,
+            Valor_luz: 2,
+            R_transfor: 1.5
+        }
     ];
 
     const contenedor = document.getElementById("contenedor-tablas");
     if (contenedor) contenedor.innerHTML = "";
 
-    // Variable acumuladora del área para el cuadrante
     let areaEntradaActual = area_palanquilla_cuadrante;
 
-    pasadas.forEach((p, idx) => {
-        // --- 0. Cálculos de Áreas ---
+    pasadas.forEach((p) => {
         let areaEntradaPaseCuadrante = areaEntradaActual;
         let areaSalidaPaseCuadrante = areaEntradaPaseCuadrante / p.R_transfor;
 
-        // Convertir a áreas totales (multiplicando los cuadrantes por 4)
         let areaEntradaTotal = areaEntradaPaseCuadrante * 4;
         let areaSalidaTotal = areaSalidaPaseCuadrante * 4;
 
-        // --- 1. Calcular la geometría en el 1er cuadrante según el tipo ---
         let perfilCuadrante;
         if (p.tipo === "AH") {
             perfilCuadrante = cilindro_AH(p.n, p.B, p.H, p.R, p.r, p.a);
-        } else if (p.tipo === "ovalo"){
+        } else if (p.tipo === "ovalo") {
             perfilCuadrante = cilindro_ovalo(p.n, p.B, p.H, p.R, p.r);
-        } else if (p.tipo === "redondo"){
-            perfilCuadrante = cilindro_redondo(p.n, p.B, p.H, p.R, p.r, p.a) /*(n = 100, B = 120.09, H = 49, R = 55, r = 8, a = 30)*/
+        } else if (p.tipo === "redondo") {
+            perfilCuadrante = cilindro_redondo(p.n, p.B, p.H, p.R, p.r, p.a);
+        } else if (p.tipo === "C1") {
+            perfilCuadrante = cilindro_C1(p.n, p.B, p.H, p.R1, p.R2, p.r);
         }
 
-        // --- 2. Aplicar la luz (+luz/2 en Y) ---
         let perfilConLuz = aplicarLuz(perfilCuadrante, p.Valor_luz);
-
-        // --- 3. Generar la simetría completa (-X a +X, +Y superior e -Y inferior) ---
         let perfilSimetrico = simetria(perfilConLuz);
 
-        // --- 4. Calcular el relleno truncado según el área de salida ---
         let x_corte = calcular_X(perfilConLuz, areaSalidaPaseCuadrante);
         let rellenoSimetrico = truncarRelleno(perfilConLuz, x_corte);
 
-        // --- 5. Crear dinámicamente la tarjeta HTML y el Canvas para la pasada ---
         if (contenedor) {
             const card = document.createElement("div");
             card.className = "cilindro-card";
             
             const canvasId = `canvas_${p.id}`;
 
-            // Mapeo seguro de propiedades calculadas
             const tipoCilindro = p.tipo || "AH";
             const areaEntradaFmt = areaEntradaTotal.toFixed(2);
             const areaSalidaFmt = areaSalidaTotal.toFixed(2);
@@ -113,35 +117,126 @@ document.addEventListener("DOMContentLoaded", () => {
             const luzVal = p.Valor_luz !== undefined ? p.Valor_luz : 0;
 
             card.innerHTML = `
-                <h2>${p.nombre}</h2>
-                <div class="pasada-content" style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
-                    
-                    <!-- Contenedor de la gráfica -->
-                    <div class="grafica-container" style="flex: 1; min-width: 300px; max-width: 800px;">
-                        <canvas id="${canvasId}"></canvas>
-                    </div>
+    <h2>${p.nombre}</h2>
+    <div class="pasada-content" style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+        <div class="grafica-container" style="flex: 1; min-width: 300px; max-width: 800px;">
+            <canvas id="${canvasId}"></canvas>
+        </div>
+        <div class="datos-pasada-card" style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; min-width: 250px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <h3 style="margin-top: 0; font-size: 1.1em; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 5px;">Datos de la Pasada</h3>
+            
+            <!-- TABLA DE DOS COLUMNAS -->
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.95em;">
+                <tbody>
+                    <tr style="border-bottom: 1px solid #dee2e6;">
+                        <td style="padding: 6px 0; font-weight: bold; color: #495057;">Caja:</td>
+                        <td style="padding: 6px 0; text-align: right; color: #212529;">${p.id}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #dee2e6;">
+                        <td style="padding: 6px 0; font-weight: bold; color: #495057;">Tipo Cilindro:</td>
+                        <td style="padding: 6px 0; text-align: right; color: #212529;">${tipoCilindro}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #dee2e6;">
+                        <td style="padding: 6px 0; font-weight: bold; color: #495057;">Área Entrada:</td>
+                        <td style="padding: 6px 0; text-align: right; color: #212529;">${areaEntradaFmt} mm²</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #dee2e6;">
+                        <td style="padding: 6px 0; font-weight: bold; color: #495057;">Área Salida:</td>
+                        <td style="padding: 6px 0; text-align: right; color: #212529;">${areaSalidaFmt} mm²</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #dee2e6;">
+                        <td style="padding: 6px 0; font-weight: bold; color: #495057;">R. Transformación:</td>
+                        <td style="padding: 6px 0; text-align: right; color: #212529;">${rTransFmt}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; font-weight: bold; color: #495057;">Luz:</td>
+                        <td style="padding: 6px 0; text-align: right; color: #212529;">${luzVal} mm</td>
+                    </tr>
+                </tbody>
+            </table>
 
-                    <!-- Letrero de datos de la pasada -->
-                    <div class="datos-pasada-card" style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; min-width: 230px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                        <h3 style="margin-top: 0; font-size: 1.1em; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 5px;">Datos de la Pasada</h3>
-                        <p style="margin: 8px 0;"><strong>Caja:</strong> <span>${p.id}</span></p>
-                        <p style="margin: 8px 0;"><strong>Tipo Cilindro:</strong> <span>${tipoCilindro}</span></p>
-                        <p style="margin: 8px 0;"><strong>Área Entrada:</strong> <span>${areaEntradaFmt} mm²</span></p>
-                        <p style="margin: 8px 0;"><strong>Área Salida:</strong> <span>${areaSalidaFmt} mm²</span></p>
-                        <p style="margin: 8px 0;"><strong>R. Transformación:</strong> <span>${rTransFmt}</span></p>
-                        <p style="margin: 8px 0;"><strong>Luz:</strong> <span>${luzVal} mm</span></p>
-                    </div>
-
-                </div>
-            `;
+        </div>
+    </div>
+`;
 
             contenedor.appendChild(card);
-
-            // --- 6. Graficar usando el canvasId recién creado ---
             graficarCilindroGenerico(canvasId, perfilSimetrico, rellenoSimetrico);
         }
 
-        // --- 7. Acumular el área para que la salida de esta pasada sea la entrada de la siguiente ---
         areaEntradaActual = areaSalidaPaseCuadrante;
     });
 });
+
+
+
+
+/*  Esto es una idea para el futuro, para crear código
+
+
+// 1. Función que actúa como plantilla (Generador del HTML)
+function crearPlantillaCard(p, canvasId, tipoCilindro, areaEntradaFmt, areaSalidaFmt, rTransFmt, luzVal) {
+    return `
+        <h2>${p.nombre}</h2>
+        <div class="pasada-content" style="display: grid; grid-template-columns: 1fr 260px; gap: 15px; align-items: start;">
+            <div class="grafica-container" style="width: 100%;">
+                <canvas id="${canvasId}"></canvas>
+            </div>
+            <div class="datos-pasada-card" style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <h3 style="margin-top: 0; font-size: 1.05em; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 5px; margin-bottom: 8px;">Datos de la Pasada</h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.88em;">
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #dee2e6;">
+                            <td style="padding: 5px 0; font-weight: bold; color: #495057;">Caja:</td>
+                            <td style="padding: 5px 0; text-align: right; color: #212529;">${p.id}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #dee2e6;">
+                            <td style="padding: 5px 0; font-weight: bold; color: #495057;">Tipo Cilindro:</td>
+                            <td style="padding: 5px 0; text-align: right; color: #212529;">${tipoCilindro}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #dee2e6;">
+                            <td style="padding: 5px 0; font-weight: bold; color: #495057;">Área Entrada:</td>
+                            <td style="padding: 5px 0; text-align: right; color: #212529;">${areaEntradaFmt} mm²</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #dee2e6;">
+                            <td style="padding: 5px 0; font-weight: bold; color: #495057;">Área Salida:</td>
+                            <td style="padding: 5px 0; text-align: right; color: #212529;">${areaSalidaFmt} mm²</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #dee2e6;">
+                            <td style="padding: 5px 0; font-weight: bold; color: #495057;">R. Transformación:</td>
+                            <td style="padding: 5px 0; text-align: right; color: #212529;">${rTransFmt}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 5px 0; font-weight: bold; color: #495057;">Luz:</td>
+                            <td style="padding: 5px 0; text-align: right; color: #212529;">${luzVal} mm</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+// 2. Uso dentro del bucle para N pasadas
+for (let i = 0; i < listaPasadas.length; i++) {
+    const p = listaPasadas[i];
+    const canvasId = `chart-pasada-${p.id}`;
+    
+    // Variables formateadas
+    const tipoCilindro = p.tipoCilindro || 'C1';
+    const areaEntradaFmt = p.areaEntrada?.toFixed(2) ?? '0.00';
+    const areaSalidaFmt = p.areaSalida?.toFixed(2) ?? '0.00';
+    const rTransFmt = p.rTrans?.toFixed(2) ?? '1.00';
+    const luzVal = p.luz ?? 0;
+
+    // Se crea el elemento card
+    const card = document.createElement("div");
+    card.className = "cilindro-card";
+    
+    // Se invoca la función plantilla pasando las variables requeridas
+    card.innerHTML = crearPlantillaCard(p, canvasId, tipoCilindro, areaEntradaFmt, areaSalidaFmt, rTransFmt, luzVal);
+
+    contenedor.appendChild(card);
+
+    // Se renderiza el gráfico Chart.js
+    graficarCilindroGenerico(canvasId, perfilSimetrico, rellenoSimetrico);
+} */
