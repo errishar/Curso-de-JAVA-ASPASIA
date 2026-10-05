@@ -173,6 +173,11 @@ export function cilindro_redondo(n = 100, B = 120.09, H = 49, R = 55, r = 8, a =
     let X3 = linespace(x_T3, x_T4, n);
     let Y3 = X3.map(x => r - Math.sqrt(Math.max(0, Math.pow(r, 2) - Math.pow(x - cx_C2, 2))));
 
+    if (r===0){
+        X3=[];
+        Y3=[];
+    }
+
     /* 5. UNIÓN Y APLICACIÓN DE SIGNOS */
     let Xi = [].concat(X1, X2, X3);
     let Yi = [].concat(Y1, Y2, Y3);
@@ -184,103 +189,6 @@ export function cilindro_redondo(n = 100, B = 120.09, H = 49, R = 55, r = 8, a =
     };
 }
 
-export function cilindro_C1_1(n=100, B=140, H=35, R1=160, R2=40,r=8 ){ /*la original, slae fatal*/
-    /*centros*/
-    let x_c1 = 0;
-    let y_c1 = H-R1;
-
-    let x_c3 = B/2;
-    let y_c3=r;
-
-        /* abrimos un inciso para crear unas variables para continuar definiendo centros*/
-        let D1=R1-R2;
-        let D3=r+R2;
-        let M=2*(y_c1-r)/B;
-        let N=(Math.pow(D1,2)-Math.pow(D3,2)-Math.pow(y_c1,2)+Math.pow(B,2)/4+Math.pow(r,2))/B;
-        let A_coef=Math.pow(M,2)+1;
-        let B_coef=2*(M*N-y_c1);
-        let C_coef=Math.pow(N,2)+Math.pow(y_c1,2)-Math.pow(D1,2);
-        
-        let discriminante = Math.pow(B_coef, 2) - 4 * A_coef * C_coef;
-
-        if (discriminante < 0) {
-            console.warn("cajas.c1.Error: Los radios no permiten tangencia física real.");
-            return { X: [], Y: [] };
-        }
-
-
-    /*Ahora seguimos con los centros, ojo que tenemos dos raices, por lo que hay que considerar entre dos centros*/
-    let y_c2_1 = ((-B_coef)+Math.sqrt(Math.max(0, Math.pow(B_coef, 2) - 4*A_coef*C_coef)))/(2*A_coef);
-    let y_c2_2 = ((-B_coef)-Math.sqrt(Math.max(0, Math.pow(B_coef, 2) - 4*A_coef*C_coef)))/(2*A_coef);
-    let x_c2_1 = M*y_c2_1+N;
-    let x_c2_2 = M*y_c2_2+N;
-
-    
-    /*# --- FILTRO DE SELECCIÓN POR CUADRANTE DE TANGENCIA ---
-    # Calculamos la primera tangencia (T12) simulada para ambas raices*/
-
-    let x_t12_1 = x_c1+ (x_c2_1 - x_c1)* R1/(R1-R2);
-    let y_t12_1 = y_c1+ (y_c2_1 - y_c1)* R1/(R1-R2);
-
-    let x_t12_2 = x_c1+ (x_c2_2 - x_c1)* R1/(R1-R2);
-    let y_t12_2 = y_c1+ (y_c2_2 - y_c1)* R1/(R1-R2);
-        
-    /* Como la premisa es siempre trabajar en primer cuadrante, el algoritmo evalúa tu condición: ¿Cuál cae en el primer cuadrante?*/
-    // Declaración fuera de las llaves para mantener el ámbito (scope)
-    let x_c2 = 0;
-    let y_c2 = 0;
-    let x_t12 = 0;
-    let y_t12 = 0;
-
-
-    if ((x_t12_1 >=0) && (y_t12_1 >=0)){ /*primera raiz en primer cuadrante*/
-        x_c2  = x_c2_1;
-        y_c2  = y_c2_1;
-        x_t12 = x_t12_1;
-        y_t12 = y_t12_1;
-    }
-    else if ((x_t12_2 >=0) && (y_t12_2 >=0)){ /*segunda raiz en primer cuadrante*/
-        x_c2  = x_c2_2;
-        y_c2  = y_c2_2;
-        x_t12 = x_t12_2;
-        y_t12 = y_t12_2;
-    }
-    else { /*Ninguna raíz matemática genera una tangencia real en el primer cuadrante."*/
-        x_c2  = 0;
-        y_c2  = 0;
-        x_t12 = 0;
-        y_t12 = 0;
-    }
-
-    /* Continuamos la segunda tangencia*/
-    let x_t23 = x_c2+(x_c3 - x_c2)*R2/(r-R2);
-    let y_t23 = y_c2+(y_c3 - y_c2)*R2/(r-R2);
-
-    /*definidos los puntos, toca las ecuaciones*/
-    let X1 = linespace(0, x_t12, n);
-    let Y1 = X1.map(x => y_c1 + Math.sqrt(Math.max(0, Math.pow(R1, 2) - Math.pow((x-x_c1), 2))));
-
-
-    let X2 = linespace(x_t12, x_t23, n);
-    let Y2 = X2.map(x => y_c2 - Math.sqrt(Math.max(0, Math.pow(R2, 2) - Math.pow((x-x_c2), 2))));
-
-
-    let X3 = linespace(x_t23, B/2 , n);
-    let Y3 = X3.map(x => y_c3 - Math.sqrt(Math.max(0, Math.pow(r, 2) - Math.pow((x-x_c3), 2))));
-
-    /* ahora a unir las matrices de los diferentes tramos y devolver una matriz del primer cuadrante*/
-    let Xi = [].concat(X1, X2, X3);
-    let Yi = [].concat(Y1, Y2, Y3);
-
-    // Mapeamos -Xi para orientar las coordenadas al cuadrante correcto
-    return {
-        X: Xi,
-        Y: Yi
-    };
-
-
-
-}
 
 
 
@@ -363,3 +271,48 @@ export function cilindro_C1(n = 100, B = 140, H = 35, R1 = 160, R2 = 40, r = 8) 
         Y: [].concat(Y1, Y2, Y3)
     };
 }
+
+
+/*B: 6.22, H: 2.45, R: 2.74, a: 100, z: 2, n: 100,*/
+
+export function cilindro_RSM(n , B , H, R, a, z){
+    let a_rad = (a/2 * Math.PI) / 180; // Ángulo de inclinación en radianes (30°)
+    n = Math.max(n, Math.trunc(B / 2));
+    /*Centro primera circunferencia */
+    let x_c1 = 0;
+    let y_c1 = H-R;
+    console.log("x_c1: " + x_c1)
+    console.log("y_c1: " + y_c1)
+    /*Centro segunda circunferencia */
+    let d=R*(z-1)
+    let x_c2 = x_c1+d*Math.sin(a_rad);
+    let y_c2 = y_c1-d*Math.cos(a_rad);
+    console.log("x_c2: " + x_c2)
+    console.log("y_c2: " + y_c2)
+
+    /*tangentes */
+    let x_t1= R*Math.sin(a_rad);
+    
+
+    // Tramo 1: Arco Superior Central (de 0 a x_t1)
+    let X1 = linespace(0, x_t1, n);
+    let Y1 = X1.map(x => y_c1+(Math.max(0, R**2-(x-x_c1)**2))**0.5);
+
+    // Tramo 2: Recta Inclinada de Transición (de x_T2 a x_T3)
+    let X2 = linespace(x_t1, B/2, n);
+    let Y2 = X2.map(x => y_c2+(Math.max(0, (z*R)**2-(x-x_c2)**2))**0.5-2);
+    
+
+    /* UNIÓN Y APLICACIÓN DE SIGNOS */
+    let Xi = [].concat(X1, X2);
+    let Yi = [].concat(Y1, Y2);
+
+    
+
+    // Mapeamos -Xi para orientar las coordenadas al cuadrante correcto
+    return {
+        X: Xi.map(x => -x),
+        Y: Yi
+    };
+
+} 
