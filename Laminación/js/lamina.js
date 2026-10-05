@@ -385,7 +385,7 @@ document.addEventListener("DOMContentLoaded", () => {
             a: 0,
             n: 100,
             Valor_luz: 1.2,
-            R_transfor: 1.3
+            R_transfor: 1
         },
         /*cilindro_RSM(n = 100, B = 120.09, H = 49, R = 55, a = 30, z=2) */
         {
@@ -398,11 +398,11 @@ document.addEventListener("DOMContentLoaded", () => {
             a: 100,
             z: 2,
             n: 100,
-            Valor_luz: 0, /* 1.25,*/
-            R_transfor: 0/*1.3*/
-        }/*,
+            Valor_luz: 1.25, /* 1.25,*/
+            R_transfor: 1.3/*1.3*/
+        },
         {
-            id: "C28", /*cilindro_RSM(p.n, p.B, p.H, p.R, p.a, p.z)
+            id: "C28", /*cilindro_RSM(p.n, p.B, p.H, p.R, p.a, p.z)*/
             nombre: "Caja C28",
             tipo: "RSM",
             B: 6.43,
@@ -412,9 +412,9 @@ document.addEventListener("DOMContentLoaded", () => {
             z: 3,
             n: 100,
             Valor_luz: 1.2,
-            R_transfor: 1.3
+            R_transfor: 1.1
         },{
-            id: "C29", /*cilindro_RSM(p.n, p.B, p.H, p.R, p.a, p.z)
+            id: "C29", /*cilindro_RSM(p.n, p.B, p.H, p.R, p.a, p.z)*/
             nombre: "Caja C29",
             tipo: "RSM",
             B: 5.87,
@@ -423,10 +423,10 @@ document.addEventListener("DOMContentLoaded", () => {
             a: 117,
             z: 3,
             n: 100,
-            Valor_luz: 1.1,
-            R_transfor: 1.3
+            Valor_luz: 1.2,
+            R_transfor: 1
         },
-        */
+        
         
     ];
 
@@ -460,8 +460,9 @@ document.addEventListener("DOMContentLoaded", () => {
         let perfilSimetrico = simetria(perfilConLuz);
 
         let x_corte = calcular_X(perfilConLuz, areaSalidaPaseCuadrante);
-        let rellenoSimetrico = truncarRelleno(perfilConLuz, x_corte);
-
+        let rellenocuadrante = truncarRelleno(perfilConLuz, x_corte);
+        let rellenoSimetrico = simetria(rellenocuadrante);
+        /*console.log("Relleno X: " + rellenocuadrante.X);*/
         if (contenedor) {
             const card = document.createElement("div");
             card.className = "cilindro-card";
@@ -473,6 +474,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const areaSalidaFmt = areaSalidaTotal.toFixed(2);
             const rTransFmt = p.R_transfor ? p.R_transfor.toFixed(2) : "0.00";
             const luzVal = p.Valor_luz !== undefined ? p.Valor_luz : 0;
+            const anchomax= (Math.max(...rellenocuadrante.X)*2).toFixed(2);
+            const altomax= (Math.max(...rellenocuadrante.Y)*2).toFixed(2);
 
             card.innerHTML = `
     <h2>${p.nombre}</h2>
@@ -506,10 +509,19 @@ document.addEventListener("DOMContentLoaded", () => {
                         <td style="padding: 6px 0; font-weight: bold; color: #495057;">R. Transformación:</td>
                         <td style="padding: 6px 0; text-align: right; color: #212529;">${rTransFmt}</td>
                     </tr>
-                    <tr>
+                    <tr style="border-bottom: 1px solid #dee2e6;">
                         <td style="padding: 6px 0; font-weight: bold; color: #495057;">Luz:</td>
                         <td style="padding: 6px 0; text-align: right; color: #212529;">${luzVal} mm</td>
                     </tr>
+                     <tr style="border-bottom: 1px solid #dee2e6;">
+                        <td style="padding: 6px 0; font-weight: bold; color: #495057;">Ancho de figura:</td>
+                        <td style="padding: 6px 0; text-align: right; color: #212529;">${anchomax} mm</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #dee2e6;">
+                        <td style="padding: 6px 0; font-weight: bold; color: #495057;">Alto de figura:</td>
+                        <td style="padding: 6px 0; text-align: right; color: #212529;">${altomax} mm</td>
+                    </tr>
+                    
                 </tbody>
             </table>
 
@@ -518,6 +530,7 @@ document.addEventListener("DOMContentLoaded", () => {
 `;
 
             contenedor.appendChild(card);
+            
             graficarCilindroGenerico(canvasId, perfilSimetrico, rellenoSimetrico);
         }
 

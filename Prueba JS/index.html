@@ -14,33 +14,31 @@
     
 <body>
 
-    <h1>Resultados del Análisis Estadístico Financiero</h1>
+    <h1>Candidato</h1>
     
     <!-- Elementos HTML ordenados donde se inyectarán los datos -->
-    <h3>Historial de Precios:</h3>
-    <p id="precios">Generando array de precios...</p>
+    <h3>Vamos a ver si el candidato es apto:</h3>
     
-    <h3>Parámetros del Canal:</h3>
-    <p id="Max_min"></p>
-    
-    <h3>Media Móvil Simple (SMA 10):</h3>
-    <p id="media_movil_10"></p>
-    
-    <h3>Media Móvil Simple (SMA 30):</h3>
-    <p id="media_movil_30"></p>
-    
-    <p id="cruces"></p>
-    <p id="EMA1"></p>
-    <p id="EMA2"></p>
-    <p id="Alerta_array_menor_intervalo"></p>
-
-
-    <div style="width: 100%; max-width: 10000px; margin: auto;">
-        <canvas id="miGrafica"></canvas>
+    <div id="pregunta_edad">
+        <label>Hola, ¿cuántos años tienes rapaz, o rapaza?</label><br>
+        <input type="edad" id="edad" placeholder="Escribe tu edad">
     </div>
 
+    <div id="pregunta_carnet">
+        <label>bien, ¿Tienes Carnet de guiar?</label><br>
+        <input type="tienecarnet" id="tienecarnet" placeholder="SI">
+    </div>
+
+    <div id="pregunta_experiencia">
+        <label>Vale, ¿cuánto llevas con él?</label><br>
+        <input type="experiencia" id="experiencia" placeholder="5">
+    </div>
+
+
+   
+
     <!-- CORREGIDO: El script se carga al final para asegurar que los elementos <p> ya existan -->
-    <script src="js/estadistica.js"></script>
+    <script src="js/generico.js"></script>
 
 
 

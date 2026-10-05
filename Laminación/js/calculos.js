@@ -68,7 +68,7 @@ export function truncarRelleno(perfilLuz, xCorte) {
     }
 
     // Retorna las coordenadas simétricas del área de relleno
-    return simetria({ X: X_tr, Y: Y_tr });
+    return { X: X_tr, Y: Y_tr };
 }
 
 export function calcularCentroC2(x1, y1, x3, y3, R1, R2, r) {

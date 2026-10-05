@@ -281,18 +281,19 @@ export function cilindro_RSM(n , B , H, R, a, z){
     /*Centro primera circunferencia */
     let x_c1 = 0;
     let y_c1 = H-R;
-    console.log("x_c1: " + x_c1)
-    console.log("y_c1: " + y_c1)
+    console.log("x_c1: " + (x_c1).toFixed(2));
+    console.log("y_c1: " + (y_c1).toFixed(2));
     /*Centro segunda circunferencia */
     let d=R*(z-1)
-    let x_c2 = x_c1+d*Math.sin(a_rad);
+    let x_c2 = -x_c1-d*Math.sin(a_rad);
     let y_c2 = y_c1-d*Math.cos(a_rad);
-    console.log("x_c2: " + x_c2)
-    console.log("y_c2: " + y_c2)
+    console.log("x_c2: " + (x_c2).toFixed(2));
+    console.log("y_c2: " + (y_c2).toFixed(2));
 
     /*tangentes */
     let x_t1= R*Math.sin(a_rad);
-    
+    console.log("x_t1: " + (x_t1).toFixed(2));
+    console.log("b/2: " +(B/2).toFixed(2));
 
     // Tramo 1: Arco Superior Central (de 0 a x_t1)
     let X1 = linespace(0, x_t1, n);
@@ -300,18 +301,30 @@ export function cilindro_RSM(n , B , H, R, a, z){
 
     // Tramo 2: Recta Inclinada de Transición (de x_T2 a x_T3)
     let X2 = linespace(x_t1, B/2, n);
-    let Y2 = X2.map(x => y_c2+(Math.max(0, (z*R)**2-(x-x_c2)**2))**0.5-2);
+    let Y2 = X2.map(x => y_c2 + Math.sqrt(Math.max(0, Math.pow(z * R, 2) - Math.pow(x - x_c2, 2))));
+
+    let X2_trunc=[];
+    let Y2_trunc=[];
+
+    let contador=0 ;
+
+    while (contador < Y2.length && Y2[contador]>0){
+        X2_trunc.push(X2[contador]),
+        Y2_trunc.push(Y2[contador])
+        
+        contador++
+    }
     
 
     /* UNIÓN Y APLICACIÓN DE SIGNOS */
-    let Xi = [].concat(X1, X2);
-    let Yi = [].concat(Y1, Y2);
+    let Xi = [].concat(X1, X2_trunc);
+    let Yi = [].concat(Y1, Y2_trunc);
 
-    
-
+    console.log("                                    FIN DE CAJA" );
+    console.log("-----------------------------------------------------------------------------" );
     // Mapeamos -Xi para orientar las coordenadas al cuadrante correcto
     return {
-        X: Xi.map(x => -x),
+        X: Xi,/*.map(x => -x),*/
         Y: Yi
     };
 
