@@ -161,3 +161,18 @@ export function interseccion_dos_circunferencias(x1, y1, R1, x2, y2, R2) {
         return null;
     }
 }
+
+
+
+export function calcular_X(perfil, areaObjetivo) {
+    let areaAcumulada = 0;
+    for (let i = 1; i < perfil.X.length; i++) {
+        let dx = perfil.X[i] - perfil.X[i - 1];
+        let yPromedio = (perfil.Y[i] + perfil.Y[i - 1]) / 2;
+        areaAcumulada += yPromedio * dx;
+        if (areaAcumulada >= areaObjetivo) {
+            return perfil.X[i];
+        }
+    }
+    return perfil.X[perfil.X.length - 1];
+}
