@@ -13,7 +13,7 @@ body {
     column-gap: 60px;
     height: 100vh;
     font-family: 'Poppins', sans-serif;
-    background-image: radial-gradient( circle 1311px at 8.6% 27.9%,  rgba(62,147,252,0.57) 12.9%, rgba(239,183,192,0.44) 91.2% );
+    background-image: radial-gradient( circle 1311px at 8.6% 27.9%,  rgba(62,47,252,0.57) 12.9%, rgba(239,183,192,0.44) 91.2% );
 }
 
 .button-86 {
