@@ -1,11 +1,82 @@
+/*pasadas.js */
+/*
+
 const n_puntos=40;
 
 
 
+document.querySelectorAll('input[name="palanquilla"]').forEach(radio=> {radio.addEventListener('change',()=>{
+    const R_y_ = obtenerLucesPorPalanquilla();
+    console.log("Pasadas y luces obtenidas:", pasadas);
+
+    if (pasadas) {
+        const pasadaAH =pasada.find(p => p.id =="AH");
+        console.log("Valos de luz AH:", pasadaAH.valor_luz);
+    }
+    <input type="radio" id="palanquilla_130" name="palanquilla" value = 130> 
+})})
+
+
+function luces_R_palanquilla(){
+
+    // Función para obtener las pasadas de luces y R según la palanquilla seleccionada
+
+    const luces_BDM = [
+    {palanquilla: 130, pasadas: [ { id: "AH", Valor_luz: 10 }, { id: "BH", Valor_luz: 5 }, { id: "CV", Valor_luz: 5 } ] },
+    {palanquilla: 140, pasadas: [ { id: "AH", Valor_luz: 10 }, { id: "BH", Valor_luz: 5 }, { id: "CV", Valor_luz: 5 } ] },
+    {palanquilla: 150, pasadas: [ { id: "AH", Valor_luz: 10 }, { id: "BH", Valor_luz: 5 }, { id: "CV", Valor_luz: 5 } ] },
+    {palanquilla: 160, pasadas: [ { id: "AH", Valor_luz: 10 }, { id: "BH", Valor_luz: 5 }, { id: "CV", Valor_luz: 5 } ] }
+    ];
+
+    const R_BDM = [ 
+    {palanquilla: 130, pasadas: [ { id: "AH", R_transfor: 1.5 }, { id: "BH", R_transfor: 1.5 }, { id: "CV", R_transfor: 1.5 } ] },
+    {palanquilla: 140, pasadas: [ { id: "AH", R_transfor: 1.5 }, { id: "BH", R_transfor: 1.5 }, { id: "CV", R_transfor: 1.5 } ] },
+    {palanquilla: 150, pasadas: [ { id: "AH", R_transfor: 1.5 }, { id: "BH", R_transfor: 1.5 }, { id: "CV", R_transfor: 1.5 } ] },
+    {palanquilla: 160, pasadas: [ { id: "AH", R_transfor: 1.5 }, { id: "BH", R_transfor: 1.5 }, { id: "CV", R_transfor: 1.5 } ] }
+    ];
+
+    const radioSeleccionado = document.querySelector('input[name="palanquilla"]:checked');
+    if (!radioSeleccionado) return { luces: [], R: [] };
+
+    const int_palan_selec = parseInt(radioSeleccionado.value, 10);
+
+    const luz = luces_BDM.find(item => item.palanquilla === int_palan_selec);
+    const R = R_BDM.find(item => item.palanquilla === int_palan_selec);
+
+    return {
+        luces: (luz && luz.pasadas) ? luz.pasadas : [],
+        R: (R && R.pasadas) ? R.pasadas : []
+    };
+}
+
+
+// Event listener para cuando cambia el radio button
+document.querySelectorAll('input[name="palanquilla"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+        const datosBDM = luces_R_palanquilla();
+        console.log("Datos BDM actualizados:", datosBDM);
+
+        if (datosBDM.luces.length > 0) {
+            const pasadaAH = datosBDM.luces.find(p => p.id === "AH");
+            console.log("Valor de luz AH:", pasadaAH?.Valor_luz);
+        }
+
+        // Generar las pasadas actualizadas con los valores elegidos
+        const pasadasActualizadas = generarPasadas55();
+        console.log("Pasadas 55 actualizadas:", pasadasActualizadas);
+    });
+});
+
+
+*/
+
+
+
+
 export const pasadas_55 = [
-    { id: "AH", nombre: "Caja AH",   tipo: "AH",        B: 180.0,   H: 46,      R: 120,     r: 8,   a: 12,  n: n_puntos,        Valor_luz: 10,      R_transfor: 1.5 },
-    { id: "BH", nombre: "Caja BH",   tipo: "ovalo",     B: 209.37,  H: 39,      R: 160,     r: 10,  a: 0,   n: n_puntos,        Valor_luz: 5,       R_transfor: 1.5 },
-    { id: "CV", nombre: "Caja CV",   tipo: "redondo",   B: 120.09,  H: 49,      R: 55,      r: 8,   a: 30,  n: n_puntos,        Valor_luz: 5,       R_transfor: 1.5 },
+    { id: "AH", nombre: "Caja AH",   tipo: "AH",        B: 180.0,   H: 46,      R: 120,     r: 8,   a: 12,  n: n_puntos,        Valor_luz: Luz_R_BDM.luz:AH,      R_transfor: Luz_R_BDM.R.AH },
+    { id: "BH", nombre: "Caja BH",   tipo: "ovalo",     B: 209.37,  H: 39,      R: 160,     r: 10,  a: 0,   n: n_puntos,        Valor_luz: Luz_R_BDM.luz.BH,      R_transfor: Luz_R_BDM.R.BH},
+    { id: "CV", nombre: "Caja CV",   tipo: "redondo",   B: 120.09,  H: 49,      R: 55,      r: 8,   a: 30,  n: n_puntos,        Valor_luz: Luz_R_BDM.luz.CV,      R_transfor: Luz_R_BDM.R.CV },
     { id: "C1", nombre: "Caja 1",    tipo: "C1",        B: 140,     H: 35,      R1: 160,    R2: 40, r: 8,   a: 0, n: n_puntos,  Valor_luz: 16,      R_transfor: 1.116 },
     { id: "C2", nombre: "Caja C2",   tipo: "ovalo",     B: 146.64,  H: 28,      R: 110,     r: 8,   a: 0,   n: n_puntos,        Valor_luz: 13,      R_transfor: 1.183 },
     { id: "C3", nombre: "Caja C3",   tipo: "redondo",   B: 90.3,    H: 36,      R: 42.2,    r: 6,   a: 30, n: n_puntos,         Valor_luz: 14,      R_transfor: 1.21 },
@@ -36,3 +107,4 @@ export const pasadas_55 = [
     { id: "C28", nombre: "Caja C28", tipo: "RSM",       B: 6.43,    H: 2.24,    R: 2.96,    a: 90,  z: 3,   n: n_puntos,        Valor_luz: 1.2,     R_transfor: 1.1071 },
     { id: "C29", nombre: "Caja C29", tipo: "RSM",       B: 5.87,    H: 2.29,    R: 2.79,    a: 117, z: 3,   n: n_puntos,        Valor_luz: 1.2,     R_transfor: 1.045 }
 ];
+
