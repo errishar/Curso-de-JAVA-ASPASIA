@@ -1,16 +1,13 @@
-/*lamina.js*/
+/* lamina.js */
 
 import { cilindro_AH, cilindro_ovalo, cilindro_redondo, cilindro_C1, cilindro_RSM } from './cilindro.js';
 import { aplicarLuz, simetria, truncarRelleno, calcular_X } from './calculos.js';
 import { graficarCilindroGenerico } from './grafica.js';
-import { pasadas_55 } from './pasadas.js';
+import { pasadas_55, generarPasadas55 } from './pasadas.js';
 
 
-// 1. VARIABLES EN ÁMBITO GLOBAL PARA QUE SEAN ACCESIBLES
-const palanquilla = 150;
-const area_palanquilla_cuadrante = Math.pow(palanquilla, 2) / 4; // 5625 mm²
-const n_puntos=40;
-const pasadas = pasadas_55;
+// 1. VARIABLES GLOBALES BÁSICAS
+const n_puntos = 40;
 
 
 // 2. FUNCIÓN DE RENDERIZADO GENERAL Y CÁLCULO
@@ -23,9 +20,16 @@ function actualizarPasadas() {
 
     contenedor.innerHTML = ""; // Limpiar antes de volver a dibujar
 
-    let areaEntradaActual = area_palanquilla_cuadrante;
+    // --- CORRECCIÓN DINÁMICA DE PALANQUILLA ---
+    // Buscamos cuál está marcado en el DOM; si no hay ninguno, usamos 150 por defecto.
+    const radioSeleccionado = document.querySelector('input[name="palanquilla"]:checked');
+    const valorPalanquilla = radioSeleccionado ? parseInt(radioSeleccionado.value, 10) : 150;
+    
+    // El área inicial del cuadrante se adapta automáticamente (ej: 130^2 / 4 o 150^2 / 4)
+    let areaEntradaActual = Math.pow(valorPalanquilla, 2) / 4; 
 
-    pasadas.forEach((p) => {
+    // Usamos el array 'pasadas_55' exportado que ya mutó tras llamar a generarPasadas55()
+    pasadas_55.forEach((p) => {
         // Tomar el valor modificado si existe, de lo contrario tomar el por defecto
         let rTransVal = p.R_transfor_modificado !== undefined ? p.R_transfor_modificado : p.R_transfor;
         let luzVal = p.Valor_luz_modificado !== undefined ? p.Valor_luz_modificado : p.Valor_luz;
@@ -44,6 +48,7 @@ function actualizarPasadas() {
         else if (p.tipo === "C1") perfilCuadrante = cilindro_C1(p.n, p.B, p.H, p.R1, p.R2, p.r);
         else if (p.tipo === "RSM") perfilCuadrante = cilindro_RSM(p.n, p.B, p.H, p.R, p.a, p.z);
 
+        // CORREGIDO: Se pasa 'perfilCuadrante' a aplicarLuz
         let perfilConLuz = aplicarLuz(perfilCuadrante, luzVal);
         let perfilSimetrico = simetria(perfilConLuz);
 
@@ -63,14 +68,14 @@ function actualizarPasadas() {
         const anchomax = (Math.max(...rellenocuadrante.X) * 2).toFixed(2);
         const altomax = (Math.max(...rellenocuadrante.Y) * 2).toFixed(2);
 
-        // PLANTILLA HTML CON DOS BOTONES RESET INDEPENDIENTES
+        // PLANTILLA HTML CON VALORES CORREGIDOS Y LIMPIOS
         card.innerHTML = `
     <h2>${p.nombre}</h2>
     <div class="pasada-content" style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
         <div class="grafica-container" style="flex: 1; min-width: 300px; max-width: 800px;">
             <canvas id="${canvasId}"></canvas>
             
-            <!-- CONTROLES Y RESETS INDEPENDIENTES (COLUMNA IZQUIERDA) -->
+            <!-- CONTROLES Y RESETS INDEPENDIENTES -->
             <div style="margin-top: 15px; border-top: 1px solid #dee2e6; padding-top: 10px;">
                 <div style="margin-bottom: 10px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -144,7 +149,7 @@ function actualizarPasadas() {
         contenedor.appendChild(card);
         graficarCilindroGenerico(canvasId, perfilSimetrico, rellenoSimetrico);
 
-        // Actualizar el área de entrada para el pase subsiguiente
+        // Actualizar el área de entrada para el pase subsiguiente de forma encadenada
         areaEntradaActual = areaSalidaPaseCuadrante;
     });
 
@@ -160,14 +165,12 @@ function actualizarPasadas() {
 
 // 3. LISTENERS DE EVENTOS (SLIDERS Y BOTONES)
 function vincularEventosControles() {
-    // Escuchar desplazamientos en sliders
     document.querySelectorAll('.slider-rtrans, .slider-luz').forEach(slider => {
         slider.addEventListener('input', (e) => {
             const idCaja = e.target.dataset.id;
             const valor = parseFloat(e.target.value);
             const esLuz = e.target.classList.contains('slider-luz');
-
-            let pasada = pasadas.find(p => p.id === idCaja);
+            let pasada = pasadas_55.find(p => p.id === idCaja);
             if (pasada) {
                 if (esLuz) {
                     pasada.Valor_luz_modificado = valor;
@@ -179,17 +182,14 @@ function vincularEventosControles() {
         });
     });
 
-
-    //  Escuchar inputs numéricos (al escribir o cambiar con las flechitas)
+    // Escuchar inputs numéricos (al escribir o cambiar con las flechitas)
     document.querySelectorAll('.input-rtrans-num, .input-luz-num').forEach(input => {
         input.addEventListener('change', (e) => {
             const idCaja = e.target.dataset.id;
             let valor = parseFloat(e.target.value);
             const esLuz = e.target.classList.contains('input-luz-num');
-
             if (isNaN(valor)) return;
-
-            let pasada = pasadas.find(p => p.id === idCaja);
+            let pasada = pasadas_55.find(p => p.id === idCaja);
             if (pasada) {
                 if (esLuz) {
                     pasada.Valor_luz_modificado = valor;
@@ -206,8 +206,7 @@ function vincularEventosControles() {
         btn.addEventListener('click', (e) => {
             const idCaja = e.target.dataset.id;
             const param = e.target.dataset.param;
-            let pasada = pasadas.find(p => p.id === idCaja);
-
+            let pasada = pasadas_55.find(p => p.id === idCaja);
             if (pasada) {
                 if (param === 'luz') {
                     delete pasada.Valor_luz_modificado;
@@ -223,7 +222,7 @@ function vincularEventosControles() {
     document.querySelectorAll('.btn-reset-todo').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const idCaja = e.target.dataset.id;
-            let pasada = pasadas.find(p => p.id === idCaja);
+            let pasada = pasadas_55.find(p => p.id === idCaja);
             if (pasada) {
                 delete pasada.Valor_luz_modificado;
                 delete pasada.R_transfor_modificado;
@@ -233,10 +232,17 @@ function vincularEventosControles() {
     });
 }
 
-
-
-
-// 4. INICIALIZAR RENDERIZADO CUANDO EL DOM ESTÉ LISTO
+// 4. INICIALIZADOR DE EVENTOS DOM
 document.addEventListener("DOMContentLoaded", () => {
+    // 1. Inicializa el array mutable con la palanquilla por defecto activa en HTML
+    generarPasadas55();
     actualizarPasadas();
+    
+    // 2. Escucha cambios en los botones de radio de la palanquilla
+    document.querySelectorAll('input[name="palanquilla"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            generarPasadas55();   // Modifica el array pasadas_55 según la BD del archivo pasadas.js
+            actualizarPasadas();  // Limpia tablas anteriores, recalcula áreas iniciales y dibuja curvas nuevas
+        });
+    });
 });
