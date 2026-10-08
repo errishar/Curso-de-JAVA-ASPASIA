@@ -12,7 +12,7 @@ public class HolaMundo{
         System.out.println("Edad: " + 35);
         System.out.print("Tercera línea");
         System.out.println("Precio: " + precio);
-        System.out.println('P');
+        System.out.print('P');
 
     }// fin main
 } //fin clase
