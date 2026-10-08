@@ -46,171 +46,144 @@ const R_BDM = [
 
 
 
+
+
+
+
+
+
+
+
+
 /* ===================================== NTM ================================================*/
 
 
 
 
 
-const luz_NTM =[
-{perfil: 5.5, 
-    pasadas:[
-        { id: "16", Valor_luz: 3},
-        { id: "17", Valor_luz: 3.15},
-        { id: "18", Valor_luz: 3.27},
-        { id: "19", Valor_luz: 2.},
-        { id: "20", Valor_luz: 2.1}, 
-        { id: "21", Valor_luz: 1.85}, 
-        { id: "22", Valor_luz: 1.19}, 
-        { id: "23", Valor_luz: 1.4}, 
-        { id: "24", Valor_luz: 1.1}, 
-        { id: "25", Valor_luz: 0.9}
-         ]},
-{perfil: 6, 
-    pasadas:[
-        { id: "16", Valor_luz: 3.75},
-        { id: "17", Valor_luz: 3.45},
-        { id: "18", Valor_luz: 3.55},
-        { id: "19", Valor_luz: 2.35},
-        { id: "20", Valor_luz: 2.38}, 
-        { id: "21", Valor_luz: 2.}, 
-        { id: "22", Valor_luz: 1.35}, 
-        { id: "23", Valor_luz: 1.6}, 
-        { id: "24", Valor_luz: 1.33}, 
-        { id: "25", Valor_luz: 1.25}
-        ]},
-{perfil: 6.5, 
-    pasadas:[
-    { id: "16", Valor_luz: 3.7},
-    { id: "17", Valor_luz: 3.4},
-    { id: "18", Valor_luz: 3.48},
-    { id: "19", Valor_luz: 2.2},
-    { id: "20", Valor_luz: 2.2}, 
-    { id: "21", Valor_luz: 1.96}, 
-    { id: "22", Valor_luz: 1.43}, 
-    { id: "23", Valor_luz: 1.4}
-    ]},
-{perfil:  7, 
-    pasadas:[
-    { id: "16", Valor_luz: 3.5},
-    { id: "17", Valor_luz: 3.35},
-    { id: "18", Valor_luz: 3.48},
-    { id: "19", Valor_luz: 2.},
-    { id: "20", Valor_luz: 2.1}, 
-    { id: "21", Valor_luz: 1.85}, 
-    { id: "22", Valor_luz: 1.19}, 
-    { id: "23", Valor_luz: 1.4},
-]},
-{perfil: 7.5, 
-    pasadas:[
-    { id: "16", Valor_luz: 3.65},
-    { id: "17", Valor_luz: 3.4},
-    { id: "18", Valor_luz: 3.48},
-    { id: "19", Valor_luz: 2.2},
-    { id: "20", Valor_luz: 2.22}, 
-    { id: "21", Valor_luz: 1.96}, 
-    { id: "22", Valor_luz: 1.3}, 
-    { id: "23", Valor_luz: 1.5}
-]},
-{perfil: 8, 
-    pasadas:[
-    { id: "16", Valor_luz: 3.4},
-    { id: "17", Valor_luz: 3.4},
-    { id: "18", Valor_luz: 3.48},
-    { id: "19", Valor_luz: 2.2},
-    { id: "20", Valor_luz: 2.2}, 
-    { id: "21", Valor_luz: 1.85},
-]},
-{perfil: 8.5, 
-    pasadas:[
-    { id: "16", Valor_luz: 3.5},
-    { id: "17", Valor_luz: 3.4},
-    { id: "18", Valor_luz: 3.48},
-    { id: "19", Valor_luz: 2.2},
-    { id: "20", Valor_luz: 2.2},
-    { id: "21", Valor_luz: 1.85},
-]},
-{perfil:  9, 
-    pasadas:[
-    { id: "16", Valor_luz: 3.5},
-    { id: "17", Valor_luz: 3.4},
-    { id: "18", Valor_luz: 3.45},
-    { id: "19", Valor_luz: 2.5},
-    { id: "20", Valor_luz: 2.2}, 
-    { id: "21", Valor_luz: 1.85},
-]},
-{perfil: 9.5, 
-    pasadas:[
-    { id: "16", Valor_luz: 3.7},
-    { id: "17", Valor_luz: 3.4},
-    { id: "18", Valor_luz: 3.48},
-    { id: "19", Valor_luz: 2.2},
-    { id: "20", Valor_luz: 2.22}, 
-    { id: "21", Valor_luz: 1.96},
-]},
-{perfil: 10, 
-    pasadas:[
-    { id: "16", Valor_luz: 3.5},
-    { id: "17", Valor_luz: 3.4},
-    { id: "18", Valor_luz: 3.45},
-    { id: "19", Valor_luz: 2.1}
-]},
-{perfil: 10.5, 
-    pasadas:[
-    { id: "16", Valor_luz: 3.5},
-    { id: "17", Valor_luz: 3.4},
-    { id: "18", Valor_luz: 3.45},
-    { id: "19", Valor_luz: 2.5}
-]},
-{perfil: 11, 
-    pasadas:[
-    { id: "16", Valor_luz: 3.8},
-    { id: "17", Valor_luz: 3.4},
-    { id: "18", Valor_luz: 3.48},
-    { id: "19", Valor_luz: 2.22}
-]},
-{perfil: 11.5, 
-    pasadas:[
-    { id: "16", Valor_luz: 3.6},
-    { id: "17", Valor_luz: 3.4},
-    { id: "18", Valor_luz: 3.48},
-    { id: "19", Valor_luz: 2.22}
-]},
-{perfil: 12, 
-    pasadas:[
-    { id: "16", Valor_luz: 3.6},
-    { id: "17", Valor_luz: 3.4}
-]},
-{perfil: 12.5, 
-    pasadas:[
-    { id: "16", Valor_luz: 3.6},
-    { id: "17", Valor_luz: 3.4}
-]},
-{perfil: 13, 
-    pasadas:[
-    { id: "16", Valor_luz: 3.6},
-    { id: "17", Valor_luz: 3.4}
-]},
-{perfil: 13.5, 
-    pasadas:[
-    { id: "16", Valor_luz: 0 },
-    { id: "17", Valor_luz: 0 }
-]},
-{perfil: 14, 
-    pasadas:[
-    { id: "16", Valor_luz: 3.7},
-    { id: "17", Valor_luz: 3.45}
+
+
+
+/*========================================= RSM ===============================================*/
+
+const cil_RSM =[ 
+{id: "26", nombre: "Caja C26", tipo: "ovalo",
+    perfiles: [
+        {perfil: 5.5,   R : 1.246},   
+        {perfil: 6,     R : 1.12},  
+        {perfil: 6.5,   R : 1.314},   
+        {perfil: 7,     R : 1.189}, 
+        {perfil: 7.5,   R : 1.137},   
+        {perfil: 8,     R : 1.328}, 
+        {perfil: 8.5,   R : 1.231},   
+        {perfil: 9,     R : 1.146}, 
+        {perfil: 9.5,   R : 1.205},   
+        {perfil: 10,    R : 1.322},    
+        {perfil: 10.5,  R : 1.322},  
+        {perfil: 11,    R : 1.25}, 
+        {perfil: 11.5,  R : 1.189},  
+        {perfil: 12,    R : 1.375},    
+        {perfil: 12.5,  R : 1.278},  
+        {perfil: 13,    R : 1.278},    
+        {perfil: 13.5,  R : 1.217},  
+        {perfil: 14,    R : 1.192},    
+        {perfil: 15,    R : 1.283},    
+        {perfil: 16,    R : 1.283},    
+        {perfil: 17,    R : 1.191},    
+        {perfil: 18,    R : 1.316},    
+        {perfil: 19,    R : 1.261},    
+        {perfil: 20,    R : 1.218},    
+        {perfil: 21,    R : 1.168},    
+        {perfil: 22,    R : 1.319}
+
+ ]
+    },
+{id: "C27", nombre: "Caja C27", tipo: "RSM",perfiles: [
+        {perfil: 5.5,   R: 1.158}, 
+        {perfil: 6,     R: 1.113}, 
+        {perfil: 5.5,   R : 1.158},    
+        {perfil: 6,     R : 1.113},    
+        {perfil: 6.5,   R : 1.193},    
+        {perfil: 7,     R : 1.15}, 
+        {perfil: 7.5,   R : 1.124},   
+        {perfil: 8	,   R : 1.21},  
+        {perfil: 8.5,   R : 1.171},   
+        {perfil: 9,     R : 1.13},  
+        {perfil: 9.5,   R : 1.129},   
+        {perfil: 10,    R : 1.225},    
+        {perfil: 10.5,  R : 1.225},  
+        {perfil: 11,    R : 1.187},    
+        {perfil: 11.5,  R : 1.146},  
+        {perfil: 12,    R : 1.262},    
+        {perfil: 12.5,  R : 1.213},  
+        {perfil: 13,    R : 1.213},    
+        {perfil: 13.5,  R : 1.186},  
+        {perfil: 14,    R : 1.168},    
+        {perfil: 15	,   R : 1.226},    
+        {perfil: 16,    R : 1.226},    
+        {perfil: 17,    R : 1.174},    
+        {perfil: 18,    R : 1.255},    
+        {perfil: 19,    R : 1.216},    
+        {perfil: 20,    R : 1.197},    
+        {perfil: 21,    R : 1.162},    
+        {perfil: 22,    R : 1.265}
+
+ ]
+    },
+{id: "C28", nombre: "Caja C28", tipo: "RSM",perfiles: [
+        {perfil: 5.5,   R : 1.071},	
+        {perfil: 6,     R : 1.057},	
+        {perfil: 6.5,   R : 1.097},	
+        {perfil: 7,     R : 1.091},	
+        {perfil: 7.5,   R : 1.044},	
+        {perfil: 8,     R : 1.121},	
+        {perfil: 8.5,   R : 1.114},	
+        {perfil: 9,     R : 1.107},	
+        {perfil: 9.5,   R : 1.031},	
+        {perfil: 10,    R : 1.128},	
+        {perfil: 10.5,  R : 1.061},	
+        {perfil: 11,    R : 1.056},	
+        {perfil: 11.5,  R : 1.053},	
+        {perfil: 12,    R : 1.105},	
+        {perfil: 12.5,  R : 1.128},	
+        {perfil: 13,    R : 1.073},	
+        {perfil: 13.5,  R : 1.07},	
+        {perfil: 14,    R : 1.045},	
+        {perfil: 15,    R : 1.127},	
+        {perfil: 16,    R : 1.037},	
+        {perfil: 17,    R : 1.036},	
+        {perfil: 18,    R : 1.124},	
+        {perfil: 19,    R : 1.098},	
+        {perfil: 20,    R : 1.063},	
+        {perfil: 21,    R : 1.046},	
+        {perfil: 22,    R : 1.101}
+ ]
+    },
+    {id: "C29", nombre: "Caja C29", tipo: "RSM",perfiles: [
+        {perfil: 5.5,   R : 1.045},	
+        {perfil: 6,     R : 1.034},	
+        {perfil: 6.5,   R : 1.054},	
+        {perfil: 7,     R : 1.054},	
+        {perfil: 7.5,   R : 1.027},	
+        {perfil: 8,     R : 1.069},	
+        {perfil: 8.5,   R : 1.063},	
+        {perfil: 9,     R : 1.062},	
+        {perfil: 9.5,   R : 1.021},	
+        {perfil: 10,    R : 1.075},	
+        {perfil: 10.5,  R : 1.037},	
+        {perfil: 11,    R : 1.035},	
+        {perfil: 11.5 ,R : 1.034},	
+        {perfil: 12 ,R : 1.104},	
+        {perfil: 12.5 ,R : 1.073},	
+        {perfil: 13 ,R : 1.043},	
+        {perfil: 13.5 ,R : 1.042},	
+        {perfil: 14 ,R : 1.028},	
+        {perfil: 15 ,R : 1.074},	
+        {perfil: 16 ,R : 1.025},	
+        {perfil: 17 ,R : 1.023},	
+        {perfil: 18 ,R : 1.071},	
+        {perfil: 19 ,R : 1.059},	
+        {perfil: 20 ,R : 1.038},	
+        {perfil: 21 ,R : 1.028},	
+        {perfil: 22 ,R : 1.058}
 ]}]
-
-
-
-
-/*========================================= RSM ===============================================
-
-
-export const pasadas_55 = [
-    { id: "C26", nombre: "Caja C26", tipo: "ovalo",     B: 9.48,    H: 1.35,    R: 19,      r: 1.5, a: 0,   n: n_puntos,        Valor_luz: 1.2,     R_transfor: 1 },
-    { id: "C27", nombre: "Caja C27", tipo: "RSM",       B: 6.22,    H: 2.45,    R: 2.74,    a: 100, z: 2,   n: n_puntos,        Valor_luz: 1.25,    R_transfor: 1.3 },
-    { id: "C28", nombre: "Caja C28", tipo: "RSM",       B: 6.43,    H: 2.24,    R: 2.96,    a: 90,  z: 3,   n: n_puntos,        Valor_luz: 1.2,     R_transfor: 1.1 },
-    { id: "C29", nombre: "Caja C29", tipo: "RSM",       B: 5.87,    H: 2.29,    R: 2.79,    a: 117, z: 3,   n: n_puntos,        Valor_luz: 1.2,     R_transfor: 1 }
-];
