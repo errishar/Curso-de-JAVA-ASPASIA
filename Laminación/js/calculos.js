@@ -109,6 +109,8 @@ export function calcularCentroC2(x1, y1, x3, y3, R1, R2, r) {
     ];
 }
 
+
+/*Saca los puntos de intersección entre dos circunferencias*/
 export function interseccion_dos_circunferencias(x1, y1, R1, x2, y2, R2) {
     /* 1. Distancia entre centros (D) */
     let dx = x2 - x1;
@@ -163,7 +165,7 @@ export function interseccion_dos_circunferencias(x1, y1, R1, x2, y2, R2) {
 }
 
 
-
+/* calculo perfil según area objetivo*/
 export function calcular_X(perfil, areaObjetivo) {
     let areaAcumulada = 0;
     for (let i = 1; i < perfil.X.length; i++) {
@@ -175,4 +177,28 @@ export function calcular_X(perfil, areaObjetivo) {
         }
     }
     return perfil.X[perfil.X.length - 1];
+}
+
+
+/**
+ * Esta función realiza una interpolación lineal para encontrar el radio de laminación local ($R$) que le corresponde a una coordenada $x$ específica (xVal) dentro del perfil del cilindro.
+ * @param {object} perfil 
+ * @param {number } xVal 
+ * @returns {}
+ */
+export function interpolarY(perfil, xVal) {
+    const X = perfil.X;
+    const Y = perfil.Y;
+
+    if (xVal <= X[0]) return Y[0];
+    if (xVal >= X[X.length - 1]) return Y[Y.length - 1];
+
+    // Búsqueda del intervalo
+    for (let i = 0; i < X.length - 1; i++) {
+        if (xVal >= X[i] && xVal <= X[i + 1]) {
+            let t = (xVal - X[i]) / (X[i + 1] - X[i]);
+            return Y[i] + t * (Y[i + 1] - Y[i]);
+        }
+    }
+    return Y[Y.length - 1];
 }

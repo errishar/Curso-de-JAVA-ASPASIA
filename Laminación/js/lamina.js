@@ -4,6 +4,7 @@ import { cilindro_AH, cilindro_ovalo, cilindro_redondo, cilindro_C1, cilindro_RS
 import { aplicarLuz, simetria, truncarRelleno, calcular_X } from './calculos.js';
 import { graficarCilindroGenerico } from './grafica.js';
 import { pasadas_55, generarPasadas55 } from './pasadas.js';
+import { calcular_xCorte_Shinokura_Con_R_Local } from './calculo_laminación.js'
 
 const n_puntos = 40;
 
