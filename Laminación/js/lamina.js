@@ -4,7 +4,7 @@ import { cilindro_AH, cilindro_ovalo, cilindro_redondo, cilindro_C1, cilindro_RS
 import { aplicarLuz, simetria, truncarRelleno, calcular_X } from './calculos.js';
 import { graficarCilindroGenerico } from './grafica.js';
 import { pasadas_55, generarPasadas55 } from './pasadas.js';
-import { calcular_xCorte_Shinokura_Con_R_Local } from './calculo_laminación.js'
+import { generarPerfilSalidaShinokura, generarPerfilSalidaEkelund, rotarSalidaAEntrada } from './calculo_laminación.js'
 
 const n_puntos = 40;
 
@@ -42,8 +42,22 @@ function actualizarPasadas() {
         let perfilConLuz = aplicarLuz(perfilCuadrante, luzVal);
         let perfilSimetrico = simetria(perfilConLuz);
 
+        /*============================================*/
+        /* Aquí se aplicaría Ekelund o Shinokura-Takai*/
+        /*============================================*/
+        /* if (p.tipo) ==="AH" rellenocuadrante =generarPerfilSalidaEkelund(perfilCuadrante, p_in, luzVal, R_nom, mu=0.35, n_puntos) /*perfilCilindro, P_in, g, R_nom, mu = 0.35, n_puntos_libre = 25
+            else rellenocuadrante = generarPerfilSalidaShinokura(perfilCuadrante, P_in, luzVal, R_nom, alpha = 0.85, n_puntos_libre = 25) /* perfilCilindro, P_in, g, R_nom, alpha = 0.85, n_puntos_libre = 25
+            faltan R_nom, P_in de la palanquilla y aplicar la función de giro.
+        
+            */
         let x_corte = calcular_X(perfilConLuz, areaSalidaPaseCuadrante);
         let rellenocuadrante = truncarRelleno(perfilConLuz, x_corte);
+        
+        /* Entregamos relleno cuadrante*/
+        /*============================================*/
+        /*============================================*/
+
+        
         let rellenoSimetrico = simetria(rellenocuadrante);
 
         // Crear Tarjeta DOM
