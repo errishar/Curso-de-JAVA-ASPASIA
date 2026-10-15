@@ -202,3 +202,44 @@ export function interpolarY(perfil, xVal) {
     }
     return Y[Y.length - 1];
 }
+
+/**
+ * Calcula el área transversal completa a partir de los puntos del 1er cuadrante
+ * @param {Array<number>} X - Coordenadas X del perfil en el primer cuadrante
+ * @param {Array<number>} Y - Coordenadas Y del perfil en el primer cuadrante
+ * @returns {number} Área total considerando la simetría de los 4 cuadrantes
+ */
+export function calcularAreaDesdePuntos(X, Y) {
+    let A_cuadrante = 0;
+    for (let i = 0; i < X.length - 1; i++) {
+        let dx = Math.abs(X[i + 1] - X[i]);
+        let y_prom = (Y[i] + Y[i + 1]) / 2;
+        A_cuadrante += y_prom * dx;
+    }
+    return A_cuadrante * 4; // Multiplicado por 4 para los cuatro cuadrantes
+}
+
+/**
+ * Genera una función de consulta de altura estandarizada a partir de un perfil (X, Y) del 1er cuadrante
+ */
+export function crearFuncionAltura(X_in, Y_in) {
+    const half_W0 = Math.max(...X_in);
+    
+    return function(x) {
+        let x_abs = Math.abs(x);
+        if (x_abs > half_W0 || X_in.length === 0) return 0;
+        
+        // Interpolación lineal
+        if (x_abs <= X_in[0]) return 2 * Y_in[0];
+        if (x_abs >= X_in[X_in.length - 1]) return 2 * Y_in[X_in.length - 1];
+
+        for (let i = 0; i < X_in.length - 1; i++) {
+            if (x_abs >= X_in[i] && x_abs <= X_in[i + 1]) {
+                let t = (x_abs - X_in[i]) / (X_in[i + 1] - X_in[i]);
+                let y_interp = Y_in[i] + t * (Y_in[i + 1] - Y_in[i]);
+                return 2 * y_interp; // Altura total simétrica
+            }
+        }
+        return 0;
+    };
+}

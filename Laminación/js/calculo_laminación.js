@@ -1,15 +1,17 @@
 /*calculo_laminación.js*/
 import { cilindro_AH, cilindro_ovalo, cilindro_redondo, cilindro_C1, cilindro_RSM } from './cilindro.js';
-import { aplicarLuz, simetria, truncarRelleno, calcular_X, interpolarY } from './calculos.js';
+import { aplicarLuz, simetria, truncarRelleno, calcular_X, interpolarY, calcularAreaDesdePuntos, crearFuncionAltura } from './calculos.js';
 
-/**
- * Calcula el ensanchamiento y genera el perfil de salida usando Ekelund Modificado (Ideal para Perfil AH)
- * @param {Object} perfilCilindro - { X, Y } devuelto por cilindro_AH
- * @param {Object} P_in - Objeto de la palanquilla de entrada { W0, A0, obtenerAlturaEn(x) }
- * @param {number} g - Luz entre cilindros (mm)
+/** 
+ * Genera el perfil de salida para la Caja AH usando el Modelo de Ekelund Modificado.
+ * Recibe únicamente las coordenadas (X, Y) del primer cuadrante de entrada.
+ * 
+ * @param {Object} perfilCilindro - { X, Y } devuelto por tu función cilindro_AH
+ * @param {Object} P_in - { X, Y } de la barra de entrada en el primer cuadrante
+ * @param {number} g - Luz total entre cilindros (mm)
  * @param {number} R_nom - Radio nominal del cilindro (mm)
  * @param {number} mu - Coeficiente de fricción (ej. 0.35 para acero de alto carbono en caliente)
- * @param {number} n_puntos_libre - Puntos para discretizar la zona libre
+ * @param {number} n_puntos_libre - Puntos para discretizar la zona libre de abombamiento
  */
 export function generarPerfilSalidaEkelund(perfilCilindro, P_in, g, R_nom, mu = 0.35, n_puntos_libre = 25) {
     const half_g = g / 2;
@@ -17,61 +19,86 @@ export function generarPerfilSalidaEkelund(perfilCilindro, P_in, g, R_nom, mu = 
     const Y_c = perfilCilindro.Y;
     const Y_luz = Y_c.map(y => y + half_g);
 
-    const W0 = P_in.W0;
-    const A0 = P_in.A0; // Área inicial de la palanquilla cuadrada
-    
-    let Ah = 0;
+    const X_in = P_in.X;
+    const Y_in = P_in.Y;
+
+    // 1. Cálculo automático de W0 y A0 reutilizando la función de área
+    const half_W0 = Math.max(...X_in);
+    const W0 = 2 * half_W0;
+    const A0 = calcularAreaDesdePuntos(X_in, Y_in);
+
+
+    // Función interna para consultar la altura de entrada interpolando los puntos
+    const obtenerAlturaEn = function(x) {
+        let x_abs = Math.abs(x);
+        if (x_abs > half_W0) return 0;
+        
+        for (let i = 0; i < X_in.length - 1; i++) {
+            if (x_abs >= X_in[i] && x_abs <= X_in[i + 1]) {
+                let t = (x_abs - X_in[i]) / (X_in[i + 1] - X_in[i]);
+                return 2 * (Y_in[i] + t * (Y_in[i + 1] - Y_in[i]));
+            }
+        }
+        return 2 * Y_in[Y_in.length - 1];
+    };
+
+    // 2. Generación de puntos de la diferencia (dh) para calcular el Ah total con la función reutilizable
+    let X_dh = [];
+    let Y_dh = [];
     let y_c_suma = 0;
     let n_contacto = 0;
     let idx_contacto = 0;
 
-    // 1. Integración numérica para hallar el área reducida (Ah)
     for (let i = 0; i < X_c.length; i++) {
         let x = X_c[i];
-        if (x > W0 / 2) break;
+        if (x > half_W0) break;
 
-        let H0_x = P_in.obtenerAlturaEn(x); 
+        let H0_x = obtenerAlturaEn(x); 
         let Y_canal_total = 2 * Y_luz[i];  
         let dh = Math.max(0, H0_x - Y_canal_total);
         
-        if (i > 0) {
-            let dx = X_c[i] - X_c[i - 1];
-            Ah += dh * dx;
-        }
+        X_dh.push(x);
+        Y_dh.push(dh); // Almacenamos la diferencia de altura temporalmente en Y
 
+        // Detección de contacto físico con el calibre
         if (dh > 0) {
             y_c_suma += Y_c[i];
             n_contacto++;
             idx_contacto = i;
         }
     }
-    Ah = Ah * 2; // Simetría de medio ancho
 
-    // 2. Parámetros equivalentes de Ekelund para calibres
-    const h0_eq = A0 / W0;
+    // Obtenemos el Ah total mediante la integración trapezoidal reutilizada
+    const Ah = calcularAreaDesdePuntos(X_dh, Y_dh);
+
+
+ /*==================Asta aquí comun ambos modelos ======== */
+
+
+    // 3. Aplicación del Modelo de Ekelund Modificado para el ensanchamiento (delta_b)
+    const H0_eq = A0 / W0;
     const dH_eq = Ah / W0;
-    const h1_eq = h0_eq - dH_eq;
+    const h1_eq = H0_eq - dH_eq;
     
     const y_c_media = n_contacto > 0 ? (y_c_suma / n_contacto) : 0;
-    const R_eff = R_nom - y_c_media;
+    const R_eff = R_nom - y_c_media; // Radio efectivo ponderado localmente
 
-    // Coeficiente m de Ekelund adaptado
-    let divisor_h = h0_eq + h1_eq;
+    let divisor_h = H0_eq + h1_eq;
     let m_eq = divisor_h > 0 ? (1.6 * mu * Math.sqrt(R_eff * dH_eq)) / divisor_h : 0;
 
-    // Fórmula clásica de Ekelund para el ensanchamiento equivalente (Delta b)
-    let numerador_ekelund = m_eq * dH_eq * Math.sqrt(R_eff * dH_eq);
-    let denominador_ekelund = h0_eq + m_eq * h1_eq;
-    let delta_b_eq = denominador_ekelund > 0 ? (numerador_ekelund / denominador_ekelund) : 0;
+    let numerador = m_eq * dH_eq * Math.sqrt(R_eff * dH_eq);
+    let denominador = H0_eq + m_eq * h1_eq;
+    let delta_b = denominador > 0 ? (numerador / denominador) : 0;
 
-    const W1 = W0 + delta_b_eq;
+    const W1 = W0 + delta_b;
     const half_W1 = W1 / 2;
+    /* ================== Hasta aquí común ambos modelos ================== */
 
-    // 3. Construcción de la matriz de puntos de salida (X_out, Y_out)
+    // 4. Construcción de la matriz de puntos de salida (X_out, Y_out) en el 1er cuadrante
     let X_out = [];
     let Y_out = [];
 
-    // --- ZONA DE CONTACTO ---
+    // --- Zona de Contacto con el Calibre ---
     for (let i = 0; i <= idx_contacto; i++) {
         X_out.push(X_c[i]);
         Y_out.push(Y_luz[i]);
@@ -80,7 +107,7 @@ export function generarPerfilSalidaEkelund(perfilCilindro, P_in, g, R_nom, mu = 
     const x_cont = X_out[X_out.length - 1];
     const y_cont = Y_out[Y_out.length - 1];
 
-    // --- ZONA LIBRE / ABOMBAMIENTO (Parábola de transición) ---
+    // --- Zona Libre / Abombamiento Lateral (Curva Parabólica de Transición) ---
     if (half_W1 > x_cont) {
         let dx_libre = (half_W1 - x_cont) / n_puntos_libre;
 
@@ -94,75 +121,102 @@ export function generarPerfilSalidaEkelund(perfilCilindro, P_in, g, R_nom, mu = 
         }
     }
 
+    // Devuelve estrictamente el objeto {X, Y} del primer cuadrante listo para la rotación de 90°
     return {
         X: X_out,
-        Y: Y_out,
-        W1: W1,
-        half_W1: half_W1,
-        x_contacto: x_cont,
-        Ah: Ah,
-        A0: A0
+        Y: Y_out
     };
 }
 
+
 /**
- * Calcula el ensanchamiento y genera el perfil de salida usando Shinokura-Takai (Óvalos, Redondos, C1, RSM)
- * @param {Object} perfilCilindro - { X, Y } devuelto por cilindro_ovalo, cilindro_C1, etc.
- * @param {Object} P_in - Objeto de la barra de entrada { W0, A0, obtenerAlturaEn(x) }
- * @param {number} g - Luz entre cilindros (mm)
+ * Genera el perfil de salida usando el modelo de Shinokura y Takai.
+ * Recibe únicamente las coordenadas (X, Y) del primer cuadrante de entrada.
+ * 
+ * @param {Object} perfilCilindro - { X, Y } devuelto por tu función de cilindro (ej. óvalo/redondo)
+ * @param {Object} P_in - { X, Y } de la barra de entrada en el primer cuadrante
+ * @param {number} g - Luz total entre cilindros (mm)
  * @param {number} R_nom - Radio nominal del cilindro (mm)
- * @param {number} alpha - Coeficiente de Shinokura (típicamente 0.83 - 0.92)
- * @param {number} n_puntos_libre - Puntos para discretizar la zona libre
+ * @param {number} alpha - Coeficiente de Shinokura (por defecto 0.85)
+ * @param {number} n_puntos_libre - Puntos para discretizar la zona libre de abombamiento
  */
+
 export function generarPerfilSalidaShinokura(perfilCilindro, P_in, g, R_nom, alpha = 0.85, n_puntos_libre = 25) {
     const half_g = g / 2;
     const X_c = perfilCilindro.X;
     const Y_c = perfilCilindro.Y;
     const Y_luz = Y_c.map(y => y + half_g);
 
-    const W0 = P_in.W0;
-    const A0 = P_in.A0;
-    
-    let Ah = 0;
+    const X_in = P_in.X;
+    const Y_in = P_in.Y;
+
+    // 1. Cálculo automático de W0 y A0 desde el primer cuadrante
+    const half_W0 = Math.max(...X_in);
+    const W0 = 2 * half_W0;
+    const A0 = calcularAreaDesdePuntos(X_in, Y_in);
+
+    // Función interna para consultar la altura de entrada interpolando los puntos
+    const obtenerAlturaEn = function(x) {
+        let x_abs = Math.abs(x);
+        if (x_abs > half_W0) return 0;
+        
+        for (let i = 0; i < X_in.length - 1; i++) {
+            if (x_abs >= X_in[i] && x_abs <= X_in[i + 1]) {
+                let t = (x_abs - X_in[i]) / (X_in[i + 1] - X_in[i]);
+                return 2 * (Y_in[i] + t * (Y_in[i + 1] - Y_in[i]));
+            }
+        }
+        return 2 * Y_in[Y_in.length - 1];
+    };
+
+    // 2. Generación de puntos de la diferencia (dh) para calcular el Ah total de forma modular
+    let X_dh = [];
+    let Y_dh = [];
     let y_c_suma = 0;
     let n_contacto = 0;
     let idx_contacto = 0;
 
     for (let i = 0; i < X_c.length; i++) {
         let x = X_c[i];
-        if (x > W0 / 2) break;
+        if (x > half_W0) break;
 
-        let H0_x = P_in.obtenerAlturaEn(x); 
+        let H0_x = obtenerAlturaEn(x); 
         let Y_canal_total = 2 * Y_luz[i];  
-        
         let dh = Math.max(0, H0_x - Y_canal_total);
         
-        if (i > 0) {
-            let dx = X_c[i] - X_c[i - 1];
-            Ah += dh * dx;
-        }
+        X_dh.push(x);
+        Y_dh.push(dh); // Almacenamos la diferencia de altura temporalmente en Y
 
+        // Detección de contacto físico con el calibre cerrado
         if (dh > 0) {
             y_c_suma += Y_c[i];
             n_contacto++;
             idx_contacto = i;
         }
     }
-    Ah = Ah * 2; 
 
-    // Ecuación de Shinokura y Takai
+    // Obtenemos el Ah total mediante la integración trapezoidal reutilizada
+    const Ah = calcularAreaDesdePuntos(X_dh, Y_dh);
+
+    /* ================== Hasta aquí común ambos modelos ================== */
+
+    // 3. Aplicación del Modelo de Shinokura y Takai para el ensanchamiento
     const H0_eq = A0 / W0;
     const dH_eq = Ah / W0;
     const y_c_media = n_contacto > 0 ? (y_c_suma / n_contacto) : 0;
-    const R_eff = R_nom - y_c_media;
+    const R_eff = R_nom - y_c_media; // Radio efectivo ponderado localmente
 
     const factorGeometria = Math.sqrt(R_eff * dH_eq) / (W0 + 0.5 * H0_eq);
     const W1 = W0 * (1 + alpha * (Ah / A0) * factorGeometria);
     const half_W1 = W1 / 2;
 
+/* ================== Hasta aquí común ambos modelos ================== */
+    
+// 4. Construcción de la matriz de puntos de salida (X_out, Y_out) en el 1er cuadrante
     let X_out = [];
     let Y_out = [];
 
+    // --- Zona de Contacto con el Calibre ---
     for (let i = 0; i <= idx_contacto; i++) {
         X_out.push(X_c[i]);
         Y_out.push(Y_luz[i]);
@@ -171,6 +225,7 @@ export function generarPerfilSalidaShinokura(perfilCilindro, P_in, g, R_nom, alp
     const x_cont = X_out[X_out.length - 1];
     const y_cont = Y_out[Y_out.length - 1];
 
+    // --- Zona Libre / Abombamiento Lateral (*Free Surface Bulging*) ---
     if (half_W1 > x_cont) {
         let dx_libre = (half_W1 - x_cont) / n_puntos_libre;
 
@@ -184,14 +239,10 @@ export function generarPerfilSalidaShinokura(perfilCilindro, P_in, g, R_nom, alp
         }
     }
 
+    // Devuelve estrictamente y únicamente el perfil laminado { X, Y } del primer cuadrante
     return {
         X: X_out,
-        Y: Y_out,
-        W1: W1,
-        half_W1: half_W1,
-        x_contacto: x_cont,
-        Ah: Ah,
-        A0: A0
+        Y: Y_out
     };
 }
 
@@ -243,12 +294,16 @@ export function rotarSalidaAEntrada(salidaAnterior) {
     };
 }
 
+
+
 /**
- * Calcula el ensanchamiento usando Tafel-Sedlaczek y genera la matriz de puntos de salida (1er cuadrante)
- * @param {Object} perfilCilindro - Objeto { X, Y } devuelto por tu función de cilindro (ej. cilindro_AH)
- * @param {Object} P_in - Objeto de entrada { W0, H0, A0, obtenerAlturaEn(x) }
- * @param {number} g - Luz o separación entre cilindros (mm)
- * @param {number} R_nom - Radio nominal de la tabla del cilindro (mm)
+ * Genera el perfil de salida usando el modelo de Tafel y Sedlaczek.
+ * Recibe únicamente las coordenadas (X, Y) del primer cuadrante de entrada.
+ * 
+ * @param {Object} perfilCilindro - { X, Y } devuelto por tu función de cilindro
+ * @param {Object} P_in - { X, Y } de la barra de entrada en el primer cuadrante
+ * @param {number} g - Luz total entre cilindros (mm)
+ * @param {number} R_nom - Radio nominal del cilindro (mm)
  * @param {number} n_puntos_libre - Puntos para discretizar la zona libre de abombamiento
  */
 export function generarPerfilSalidaTafelSedlaczek(perfilCilindro, P_in, g, R_nom, n_puntos_libre = 25) {
@@ -257,21 +312,42 @@ export function generarPerfilSalidaTafelSedlaczek(perfilCilindro, P_in, g, R_nom
     const Y_c = perfilCilindro.Y;
     const Y_luz = Y_c.map(y => y + half_g);
 
-    const W0 = P_in.W0; // Ancho inicial (bin)
-    const H0 = P_in.H0; // Espesor/altura inicial de entrada (hin)
-    const Hout = g;     // Espesor de salida de referencia en la luz (hout)
+    const X_in = P_in.X;
+    const Y_in = P_in.Y;
+
+    // 1. Cálculo automático de propiedades desde el primer cuadrante
+    const half_W0 = Math.max(...X_in);
+    const W0 = 2 * half_W0;
     
+    // Altura/espesor inicial de entrada máximo (2 veces la máxima altura del 1er cuadrante)
+    const H0 = 2 * Math.max(...Y_in); 
+    const Hout = g; // Espesor de salida de referencia en la luz
+
+    // Función interna para consultar la altura de entrada interpolando los puntos
+    const obtenerAlturaEn = function(x) {
+        let x_abs = Math.abs(x);
+        if (x_abs > half_W0) return 0;
+        
+        for (let i = 0; i < X_in.length - 1; i++) {
+            if (x_abs >= X_in[i] && x_abs <= X_in[i + 1]) {
+                let t = (x_abs - X_in[i]) / (X_in[i + 1] - X_in[i]);
+                return 2 * (Y_in[i] + t * (Y_in[i + 1] - Y_in[i]));
+            }
+        }
+        return 2 * Y_in[Y_in.length - 1];
+    };
+
+    // 2. Integración numérica para hallar el área reducida (Ah) y detectar contacto
     let Ah_cuadrante = 0;
     let y_c_suma = 0;
     let n_contacto = 0;
     let idx_contacto = 0;
 
-    // 1. Integración numérica para hallar el área reducida (Ah) en el primer cuadrante
     for (let i = 0; i < X_c.length; i++) {
         let x = X_c[i];
-        if (x > W0 / 2) break;
+        if (x > half_W0) break;
 
-        let H0_x = P_in.obtenerAlturaEn(x); 
+        let H0_x = obtenerAlturaEn(x); 
         let Y_canal_total = 2 * Y_luz[i];  
         let dh = Math.max(0, H0_x - Y_canal_total);
         
@@ -286,16 +362,14 @@ export function generarPerfilSalidaTafelSedlaczek(perfilCilindro, P_in, g, R_nom
             idx_contacto = i;
         }
     }
-    const Ah_total = Ah_cuadrante * 2; // Simetría completa de medio ancho
 
-    // 2. Aplicación de la fórmula de Tafel y Sedlaczek
-    // Δb = (Δh * bin * sqrt(bin * R)) / (3 * (bin^2 + (hin * hout)))
+    // 3. Aplicación de la fórmula de Tafel y Sedlaczek para el ensanchamiento
     const dh_global = H0 - Hout;
     let delta_b = 0;
 
     if (dh_global > 0) {
         let y_c_media = n_contacto > 0 ? (y_c_suma / n_contacto) : 0;
-        let R_eff = R_nom - y_c_media; // Radio efectivo ponderado con la profundidad local
+        let R_eff = R_nom - y_c_media; // Radio efectivo ponderado localmente
 
         let numerador = dh_global * W0 * Math.sqrt(W0 * R_eff);
         let denominador = 3 * (Math.pow(W0, 2) + (H0 * Hout));
@@ -303,15 +377,14 @@ export function generarPerfilSalidaTafelSedlaczek(perfilCilindro, P_in, g, R_nom
         delta_b = denominador !== 0 ? numerador / denominador : 0;
     }
 
-    // Ancho total de salida W1 y su límite en el primer cuadrante
     const W1 = W0 + delta_b;
     const half_W1 = W1 / 2;
 
-    // 3. Construcción de la matriz de puntos de salida (X_out, Y_out) en el primer cuadrante
+    // 4. Construcción de la matriz de puntos de salida (X_out, Y_out) en el primer cuadrante
     let X_out = [];
     let Y_out = [];
 
-    // --- TRAMO A: Zona de Contacto (el metal calca el canal del cilindro) ---
+    // --- TRAMO A: Zona de Contacto ---
     for (let i = 0; i <= idx_contacto; i++) {
         X_out.push(X_c[i]);
         Y_out.push(Y_luz[i]);
@@ -320,14 +393,13 @@ export function generarPerfilSalidaTafelSedlaczek(perfilCilindro, P_in, g, R_nom
     const x_cont = X_out[X_out.length - 1];
     const y_cont = Y_out[Y_out.length - 1];
 
-    // --- TRAMO B: Zona Libre / Abombamiento lateral (Curva parabólica de transición) ---
+    // --- TRAMO B: Zona Libre / Abombamiento Lateral (Curva parabólica) ---
     if (half_W1 > x_cont) {
         let dx_libre = (half_W1 - x_cont) / n_puntos_libre;
 
         for (let i = 1; i <= n_puntos_libre; i++) {
             let x = x_cont + i * dx_libre;
             let t = (x - x_cont) / (half_W1 - x_cont);
-            // Parábola que suaviza desde el último punto de contacto hasta la altura de la luz (half_g)
             let y = y_cont - (y_cont - half_g) * Math.pow(t, 2);
 
             X_out.push(x);
@@ -335,23 +407,22 @@ export function generarPerfilSalidaTafelSedlaczek(perfilCilindro, P_in, g, R_nom
         }
     }
 
+    // Devuelve estrictamente el objeto { X, Y } del primer cuadrante para la siguiente etapa
     return {
         X: X_out,
-        Y: Y_out,
-        W1: W1,
-        half_W1: half_W1,
-        x_contacto: x_cont,
-        delta_b: delta_b,
-        Ah: Ah_total
+        Y: Y_out
     };
 }
 
+
 /**
- * Calcula el ensanchamiento usando el modelo de Koncevicz y genera la matriz de puntos de salida (1er cuadrante)
- * @param {Object} perfilCilindro - Objeto { X, Y } devuelto por tu función de cilindro (ej. cilindro_AH)
- * @param {Object} P_in - Objeto de entrada { W0, H0, A0, obtenerAlturaEn(x) }
- * @param {number} g - Luz o separación entre cilindros (mm)
- * @param {number} R_nom - Radio nominal de la tabla del cilindro (mm)
+ * Genera el perfil de salida usando el modelo de Koncevicz.
+ * Recibe únicamente las coordenadas (X, Y) del primer cuadrante de entrada.
+ * 
+ * @param {Object} perfilCilindro - { X, Y } devuelto por tu función de cilindro
+ * @param {Object} P_in - { X, Y } de la barra de entrada en el primer cuadrante
+ * @param {number} g - Luz total entre cilindros (mm)
+ * @param {number} R_nom - Radio nominal del cilindro (mm)
  * @param {number} n_puntos_libre - Puntos para discretizar la zona libre de abombamiento
  */
 export function generarPerfilSalidaKoncevicz(perfilCilindro, P_in, g, R_nom, n_puntos_libre = 25) {
@@ -360,21 +431,42 @@ export function generarPerfilSalidaKoncevicz(perfilCilindro, P_in, g, R_nom, n_p
     const Y_c = perfilCilindro.Y;
     const Y_luz = Y_c.map(y => y + half_g);
 
-    const W0 = P_in.W0; // Ancho inicial (bin)
-    const H0 = P_in.H0; // Espesor/altura inicial de entrada (hin)
-    const Hout = g;     // Espesor de salida de referencia en la luz (hout)
+    const X_in = P_in.X;
+    const Y_in = P_in.Y;
+
+    // 1. Cálculo automático de propiedades desde el primer cuadrante
+    const half_W0 = Math.max(...X_in);
+    const W0 = 2 * half_W0;
     
+    // Espesor/altura inicial de entrada (2 veces la altura máxima del 1er cuadrante)
+    const H0 = 2 * Math.max(...Y_in); 
+    const Hout = g; // Espesor de salida de referencia en la luz
+
+    // Función interna para consultar la altura de entrada interpolando los puntos
+    const obtenerAlturaEn = function(x) {
+        let x_abs = Math.abs(x);
+        if (x_abs > half_W0) return 0;
+        
+        for (let i = 0; i < X_in.length - 1; i++) {
+            if (x_abs >= X_in[i] && x_abs <= X_in[i + 1]) {
+                let t = (x_abs - X_in[i]) / (X_in[i + 1] - X_in[i]);
+                return 2 * (Y_in[i] + t * (Y_in[i + 1] - Y_in[i]));
+            }
+        }
+        return 2 * Y_in[Y_in.length - 1];
+    };
+
+    // 2. Integración numérica para hallar el área reducida (Ah) y detectar contacto
     let Ah_cuadrante = 0;
     let y_c_suma = 0;
     let n_contacto = 0;
     let idx_contacto = 0;
 
-    // 1. Integración numérica para hallar el área reducida (Ah) en el primer cuadrante
     for (let i = 0; i < X_c.length; i++) {
         let x = X_c[i];
-        if (x > W0 / 2) break;
+        if (x > half_W0) break;
 
-        let H0_x = P_in.obtenerAlturaEn(x); 
+        let H0_x = obtenerAlturaEn(x); 
         let Y_canal_total = 2 * Y_luz[i];  
         let dh = Math.max(0, H0_x - Y_canal_total);
         
@@ -389,9 +481,8 @@ export function generarPerfilSalidaKoncevicz(perfilCilindro, P_in, g, R_nom, n_p
             idx_contacto = i;
         }
     }
-    const Ah_total = Ah_cuadrante * 2; // Simetría completa de medio ancho
 
-    // 2. Aplicación de la fórmula de Koncevicz
+    // 3. Aplicación de la fórmula de Koncevicz para el ensanchamiento
     const dh_global = H0 - Hout;
     let delta_b = 0;
 
@@ -403,15 +494,14 @@ export function generarPerfilSalidaKoncevicz(perfilCilindro, P_in, g, R_nom, n_p
         delta_b = 0.66 * (dh_global / (H0 + Hout)) * Math.sqrt(dh_global * R_eff);
     }
 
-    // Ancho total de salida W1 y su límite en el primer cuadrante
     const W1 = W0 + delta_b;
     const half_W1 = W1 / 2;
 
-    // 3. Construcción de la matriz de puntos de salida (X_out, Y_out) en el primer cuadrante
+    // 4. Construcción de la matriz de puntos de salida (X_out, Y_out) en el primer cuadrante
     let X_out = [];
     let Y_out = [];
 
-    // --- TRAMO A: Zona de Contacto (el metal calca el canal del cilindro) ---
+    // --- TRAMO A: Zona de Contacto ---
     for (let i = 0; i <= idx_contacto; i++) {
         X_out.push(X_c[i]);
         Y_out.push(Y_luz[i]);
@@ -420,7 +510,7 @@ export function generarPerfilSalidaKoncevicz(perfilCilindro, P_in, g, R_nom, n_p
     const x_cont = X_out[X_out.length - 1];
     const y_cont = Y_out[Y_out.length - 1];
 
-    // --- TRAMO B: Zona Libre / Abombamiento lateral (Curva parabólica de transición) ---
+    // --- TRAMO B: Zona Libre / Abombamiento Lateral (Curva parabólica) ---
     if (half_W1 > x_cont) {
         let dx_libre = (half_W1 - x_cont) / n_puntos_libre;
 
@@ -434,13 +524,9 @@ export function generarPerfilSalidaKoncevicz(perfilCilindro, P_in, g, R_nom, n_p
         }
     }
 
+    // Devuelve estrictamente el objeto { X, Y } del primer cuadrante listo para la rotación de 90°
     return {
         X: X_out,
-        Y: Y_out,
-        W1: W1,
-        half_W1: half_W1,
-        x_contacto: x_cont,
-        delta_b: delta_b,
-        Ah: Ah_total
+        Y: Y_out
     };
 }
