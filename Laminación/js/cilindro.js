@@ -190,10 +190,6 @@ export function cilindro_redondo(n = 100, B = 120.09, H = 49, R = 55, r = 8, a =
 }
 
 
-
-
-
-
 export function cilindro_C1(n = 100, B = 140, H = 35, R1 = 160, R2 = 40, r = 8) {
     // 1. Centros fijos según el plano técnico
     const x_c1 = 0;
@@ -329,3 +325,15 @@ export function cilindro_RSM(n , B , H, R, a, z){
     };
 
 } 
+
+export function relleno_palanquilla(p){
+    let X = linespace(0, p/2, n);
+    let Y = linespace(p/2, p/2, n);
+
+    let Xi = [].concat(X, p/2, 0);
+    let Yi = [].concat(Y, 0, 0);
+    return {
+        X: Xi,
+        Y: Yi
+    };
+}

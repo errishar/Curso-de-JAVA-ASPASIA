@@ -15,7 +15,7 @@ function actualizarPasadas() {
     // 1. Obtener palanquilla seleccionada y área inicial
     const radioSeleccionado = document.querySelector('input[name="palanquilla"]:checked');
     const valorPalanquilla = radioSeleccionado ? parseFloat(radioSeleccionado.value) : 150;
-    let areaEntradaActual = Math.pow(valorPalanquilla, 2) / 4;
+    let p_in = 2;/*tengo que hacer la aplicación de palanquilla*/
 
     const scrollPos = window.scrollY;
     contenedor.innerHTML = "";
@@ -23,13 +23,8 @@ function actualizarPasadas() {
     pasadas_55.forEach((p) => {
         let rTransVal = p.R_transfor_modificado !== undefined ? p.R_transfor_modificado : p.R_transfor;
         let luzVal = p.Valor_luz_modificado !== undefined ? p.Valor_luz_modificado : p.Valor_luz;
-
-        let areaEntradaPaseCuadrante = areaEntradaActual;
-        let areaSalidaPaseCuadrante = areaEntradaPaseCuadrante / rTransVal;
-
-        let areaEntradaTotal = areaEntradaPaseCuadrante * 4;
-        let areaSalidaTotal = areaSalidaPaseCuadrante * 4;
-
+        let R_nom=(max_R_nom+min_R_nom)/2
+        
         // Generar Geometría del perfil según p.tipo
         let perfilCuadrante;
         if (p.tipo === "AH") perfilCuadrante = cilindro_AH(p.n || n_puntos, p.B, p.H, p.R, p.r, p.a);
@@ -39,20 +34,14 @@ function actualizarPasadas() {
         else if (p.tipo === "RSM") perfilCuadrante = cilindro_RSM(p.n || n_puntos, p.B, p.H, p.R, p.a || 100, p.z || 2);
         else perfilCuadrante = cilindro_ovalo(p.n || n_puntos, p.B, p.H, p.R, p.r);
 
-        let perfilConLuz = aplicarLuz(perfilCuadrante, luzVal);
-        let perfilSimetrico = simetria(perfilConLuz);
+      
+       if (p.tipo ==="AH") {
+                rellenocuadrante =generarPerfilSalidaEkelund(perfilCuadrante, p_in, luzVal,R_nom , mu=0.35, n_puntos);} /*perfilCilindro, P_in, g, R_nom, mu = 0.35, n_puntos_libre = 25*/
+            else  {
+                p_in = generarPerfilSalidaShinokura(perfilCuadrante, P_in, luzVal, R_nom, alpha = 0.85, n_puntos_libre = 25); /* perfilCilindro, P_in, g, R_nom, alpha = 0.85, n_puntos_libre = 25
+            aplicar la función de giro. */
+                p_in = rotarSalidaAEntrada(salidaAnterior) 
 
-        /*============================================*/
-        /* Aquí se aplicaría Ekelund o Shinokura-Takai*/
-        /*============================================*/
-        /* if (p.tipo) ==="AH" rellenocuadrante =generarPerfilSalidaEkelund(perfilCuadrante, p_in, luzVal, R_nom, mu=0.35, n_puntos) /*perfilCilindro, P_in, g, R_nom, mu = 0.35, n_puntos_libre = 25
-            else rellenocuadrante = generarPerfilSalidaShinokura(perfilCuadrante, P_in, luzVal, R_nom, alpha = 0.85, n_puntos_libre = 25) /* perfilCilindro, P_in, g, R_nom, alpha = 0.85, n_puntos_libre = 25
-            faltan R_nom, P_in de la palanquilla y aplicar la función de giro.
-        
-            */
-        let x_corte = calcular_X(perfilConLuz, areaSalidaPaseCuadrante);
-        let rellenocuadrante = truncarRelleno(perfilConLuz, x_corte);
-        
         /* Entregamos relleno cuadrante*/
         /*============================================*/
         /*============================================*/
