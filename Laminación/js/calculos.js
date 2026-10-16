@@ -2,10 +2,15 @@ export function linespace(x1, x2, n) {
     let X = [];
     let paso = (x2 - x1) / (n - 1);
     for (let i = 0; i < n; i++) {
-        X.push(x1 + i * paso);
+        X.push(trunc(x1 + i * paso,2));
     }
     return X;
 }
+
+export function trunc(numero,n) {
+  return Math.trunc(numero * 10**n) / (10**n);
+}
+
 
 // 1. Desplaza el perfil en Y según la luz
 export function aplicarLuz(cuadrante, valorLuz) {

@@ -1,5 +1,5 @@
 /* cilindro.js*/
-import { linespace, interseccion_dos_circunferencias, calcularCentroC2 } from './calculos.js';
+import { linespace, interseccion_dos_circunferencias, calcularCentroC2, trunc} from './calculos.js';
 
 
 export function cilindro_AH(n, B, H, R, r, a_deg) {
@@ -60,7 +60,8 @@ export function cilindro_AH(n, B, H, R, r, a_deg) {
 
     let X = [].concat(X1, X2, X3, X4, X5);
     let Y = [].concat(Y1, Y2, Y3, Y4, Y5);
-
+        X=X.map(x=> trunc(x,2));
+        Y=Y.map(y=> trunc(y,2));
     return { X: X, Y: Y };
 }
 
@@ -135,7 +136,8 @@ export function cilindro_ovalo(n, B, H, R, r_fijo) {
         Xi_filt[Xi_filt.length - 1] = x_limite_exterior;
         Yi_filt[Yi_filt.length - 1] = 0.0; // Muere en cota cero
     }
-
+        Xi_filt=Xi_filt.map(x=> trunc(x,2));
+        Yi_filt=Yi_filt.map(y=> trunc(y,2));
     return {
         X: Xi_filt,
         Y: Yi_filt
@@ -261,11 +263,11 @@ export function cilindro_C1(n = 100, B = 140, H = 35, R1 = 160, R2 = 40, r = 8) 
         X3.push(x);
         Y3.push(y);
     }
-
-    return {
-        X: [].concat(X1, X2, X3),
-        Y: [].concat(Y1, Y2, Y3)
-    };
+    let X = [].concat(X1, X2, X3);
+    let Y = [].concat(Y1, Y2, Y3);
+    X=X.map(x=> trunc(x,2));
+    Y=Y.map(y=> trunc(y,2));
+    return { X: X, Y: Y };
 }
 
 
@@ -319,19 +321,25 @@ export function cilindro_RSM(n , B , H, R, a, z){
     /*console.log("                                    FIN DE CAJA" );
     console.log("-----------------------------------------------------------------------------" );*/
     // Mapeamos -Xi para orientar las coordenadas al cuadrante correcto
+    
+    Xi=Xi.map(x=> trunc(x,2));
+    Yi=Yi.map(y=> trunc(y,2));
+    
     return {
-        X: Xi,/*.map(x => -x),*/
+        X: Xi,
         Y: Yi
     };
 
 } 
 
-export function relleno_palanquilla(p){
+export function relleno_palanquilla(p,n){
     let X = linespace(0, p/2, n);
     let Y = linespace(p/2, p/2, n);
 
     let Xi = [].concat(X, p/2, 0);
     let Yi = [].concat(Y, 0, 0);
+    Xi=Xi.map(x=> trunc(x,2));
+    Yi=Yi.map(y=> trunc(y,2));
     return {
         X: Xi,
         Y: Yi

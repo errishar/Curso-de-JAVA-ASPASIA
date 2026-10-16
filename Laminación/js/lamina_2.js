@@ -1,10 +1,10 @@
 /* lamina.js */
 
-import { cilindro_AH, cilindro_ovalo, cilindro_redondo, cilindro_C1, cilindro_RSM } from './cilindro.js';
-import { aplicarLuz, simetria, truncarRelleno, calcular_X } from './calculos.js';
+import { cilindro_AH, cilindro_ovalo, cilindro_redondo, cilindro_C1, cilindro_RSM, relleno_palanquilla } from './cilindro.js';
+import { simetria, calcularAreaDesdePuntos, aplicarLuz } from './calculos.js';
 import { graficarCilindroGenerico } from './grafica.js';
 import { pasadas_55, generarPasadas55 } from './pasadas.js';
-import { generarPerfilSalidaShinokura, generarPerfilSalidaEkelund, rotarSalidaAEntrada, generarPerfilSalidaTafelSedlaczek, generarPerfilSalidaKoncevicz } from './calculo_laminación.js'
+import { generarPerfilSalidaEkelund, generarPerfilSalidaEkelundZheng, generarPerfilSalidaShinokura,generarPerfilSalidaShinokura2, rotarSalidaAEntrada, generarPerfilSalidaTafelSedlaczek, generarPerfilSalidaKoncevicz } from './calculo_laminación.js';
 
 const n_puntos = 40;
 
@@ -12,18 +12,23 @@ function actualizarPasadas() {
     const contenedor = document.getElementById("contenedor-tablas");
     if (!contenedor) return;
 
-    // 1. Obtener palanquilla seleccionada y área inicial
-    const radioSeleccionado = document.querySelector('input[name="palanquilla"]:checked');
-    const valorPalanquilla = radioSeleccionado ? parseFloat(radioSeleccionado.value) : 150;
-    let p_in = 2;/*tengo que hacer la aplicación de palanquilla*/
+    // Guardar la posición del scroll antes de actualizar
+    let scrollPos = window.scrollY;
 
-    const scrollPos = window.scrollY;
+    // 1. Obtener palanquilla seleccionada y área inicial
+    let radioSeleccionado = document.querySelector('input[name="palanquilla"]:checked');
+    let valorPalanquilla = radioSeleccionado ? parseFloat(radioSeleccionado.value) : 150;
+    let rellenocuadrante = relleno_palanquilla(valorPalanquilla, n_puntos);
+  
+    let areaEntradaTotal = calcularAreaDesdePuntos(rellenocuadrante.X, rellenocuadrante.Y);
+
     contenedor.innerHTML = "";
 
     pasadas_55.forEach((p) => {
         let rTransVal = p.R_transfor_modificado !== undefined ? p.R_transfor_modificado : p.R_transfor;
         let luzVal = p.Valor_luz_modificado !== undefined ? p.Valor_luz_modificado : p.Valor_luz;
-        let R_nom=(max_R_nom+min_R_nom)/2
+        let R_nom = (p.max_R_nom + p.min_R_nom) / 2;
+        let areaSalidaTotal;
         
         // Generar Geometría del perfil según p.tipo
         let perfilCuadrante;
@@ -33,19 +38,35 @@ function actualizarPasadas() {
         else if (p.tipo === "C1") perfilCuadrante = cilindro_C1(p.n || n_puntos, p.B, p.H, p.R1, p.R2, p.r);
         else if (p.tipo === "RSM") perfilCuadrante = cilindro_RSM(p.n || n_puntos, p.B, p.H, p.R, p.a || 100, p.z || 2);
         else perfilCuadrante = cilindro_ovalo(p.n || n_puntos, p.B, p.H, p.R, p.r);
-
+        
+        let perfilConLuz = aplicarLuz(perfilCuadrante, luzVal);
+        let perfilSimetrico = simetria(perfilConLuz);
       
-       if (p.tipo ==="AH") {
-                rellenocuadrante =generarPerfilSalidaEkelund(perfilCuadrante, p_in, luzVal,R_nom , mu=0.35, n_puntos);} /*perfilCilindro, P_in, g, R_nom, mu = 0.35, n_puntos_libre = 25*/
-            else  {
-                p_in = generarPerfilSalidaShinokura(perfilCuadrante, P_in, luzVal, R_nom, alpha = 0.85, n_puntos_libre = 25); /* perfilCilindro, P_in, g, R_nom, alpha = 0.85, n_puntos_libre = 25
-            aplicar la función de giro. */
-                p_in = rotarSalidaAEntrada(salidaAnterior) 
-
-        /* Entregamos relleno cuadrante*/
-        /*============================================*/
-        /*============================================*/
-
+        if (p.tipo === "AH") {
+            let mu = 0.35;
+            /*console.log("rellenocuadrante",p.nombre,": ", rellenocuadrante);
+            console.log("perfilCuadrante",p.nombre,": ", perfilCuadrante);
+            console.log("luzVal",p.nombre,": ", luzVal);
+            console.log("R_nom",p.nombre,": ", R_nom);
+            console.log("mu",p.nombre,": ",mu);*/
+            rellenocuadrante = generarPerfilSalidaEkelundZheng(perfilCuadrante, rellenocuadrante, luzVal, R_nom, mu, n_puntos);
+            areaSalidaTotal = calcularAreaDesdePuntos(rellenocuadrante.X, rellenocuadrante.Y);
+            rTransVal = areaEntradaTotal/areaSalidaTotal ;
+        } else {
+            let alpha = 0.85;
+            console.log("rellenocuadrante",p.nombre,": ", rellenocuadrante);
+            console.log("perfilCuadrante",p.nombre,": ", perfilCuadrante);
+            console.log("luzVal",p.nombre,": ", luzVal);
+            console.log("R_nom",p.nombre,": ", R_nom);
+            console.log("alpha",p.nombre,": ",alpha);
+            rellenocuadrante = generarPerfilSalidaShinokura(perfilCuadrante, rellenocuadrante, luzVal, R_nom, alpha, n_puntos);
+            
+            areaSalidaTotal = calcularAreaDesdePuntos(rellenocuadrante.X, rellenocuadrante.Y);            
+            rTransVal = areaEntradaTotal/areaSalidaTotal ;
+            if (p.nombre !="BH"){
+            rellenocuadrante = rotarSalidaAEntrada(rellenocuadrante);
+            }
+        }
         
         let rellenoSimetrico = simetria(rellenocuadrante);
 
@@ -59,10 +80,10 @@ function actualizarPasadas() {
         const areaSalidaFmt = areaSalidaTotal.toFixed(2);
         const rTransFmt = rTransVal.toFixed(2);
 
-        const xVals = (rellenocuadrante && rellenocuadrante.X && rellenocuadrante.X.length > 0) ? rellenocuadrante.X : [0];
-        const yVals = (rellenocuadrante && rellenocuadrante.Y && rellenocuadrante.Y.length > 0) ? rellenocuadrante.Y : [0];
+        const xVals = (rellenoSimetrico && rellenoSimetrico.X_sup && rellenoSimetrico.X_sup.length > 0) ? rellenoSimetrico.X_sup : [0];
+        const yVals = (rellenoSimetrico && rellenoSimetrico.Y_sup && rellenoSimetrico.Y_sup.length > 0) ? rellenoSimetrico.Y_sup : [0];
 
-        const anchomax = (Math.max(...xVals) * 2).toFixed(2);
+        const anchomax = (Math.max(...xVals)).toFixed(2);
         const altomax = (Math.max(...yVals) * 2).toFixed(2);
 
         card.innerHTML = `
@@ -140,15 +161,15 @@ function actualizarPasadas() {
 
         contenedor.appendChild(card);
 
-        // Definición del evento al pulsar sobre la gráfica
         const miAccionAlPulsar = () => {
             window.location.href = `detalle.html?id=${p.id}`;
         };
 
-        // Renderizar la gráfica pasando la acción de clic
+        // Renderizar la gráfica
         graficarCilindroGenerico(canvasId, perfilSimetrico, rellenoSimetrico, miAccionAlPulsar);
 
-        areaEntradaActual = areaSalidaPaseCuadrante;
+        // Actualizar área de entrada para la siguiente pasada
+        areaEntradaTotal = areaSalidaTotal;
     });
 
     vincularEventosControles();
