@@ -66,6 +66,7 @@ export function cilindro_AH(n, B, H, R, r, a_deg) {
 }
 
 
+
 export function cilindro_ovalo(n, B, H, R, r_fijo) {
     n = Math.max(n, 25);
     let x_final = B / 2.0;

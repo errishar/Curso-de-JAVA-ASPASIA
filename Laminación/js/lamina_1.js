@@ -43,6 +43,7 @@ function actualizarPasadas() {
         let perfilConLuz = aplicarLuz(perfilCuadrante, luzVal);
         let perfilSimetrico = simetria(perfilConLuz);
 
+        
  
         let x_corte = calcular_X(perfilConLuz, areaSalidaPaseCuadrante);
         let rellenocuadrante = truncarRelleno(perfilConLuz, x_corte);
