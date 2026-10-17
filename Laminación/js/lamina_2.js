@@ -5,7 +5,7 @@ import { cilindro_AH, cilindro_ovalo, cilindro_redondo, cilindro_C1, cilindro_RS
 import { simetria, calcularAreaDesdePuntos, aplicarLuz } from './calculos.js';
 import { graficarCilindroGenerico } from './grafica.js';
 import { pasadas_55, generarPasadas55 } from './pasadas.js';
-import { generarPerfilSalidaEkelund, generarPerfilSalidaEkelundZheng, generarPerfilSalidaShinokura,generarPerfilSalidaShinokura2, rotarSalidaAEntrada, generarPerfilSalidaTafelSedlaczek, generarPerfilSalidaKoncevicz } from './calculo_laminación.js';
+import { generarPerfilSalidaEkelund, generarPerfilSalidaEkelundZheng, generarPerfilSalidaShinokura ,generarPerfilSalidaShinokura2, generarPerfilSalidaZheng, rotarSalidaAEntrada, generarPerfilSalidaTafelSedlaczek, generarPerfilSalidaKoncevicz } from './calculo_laminación.js';
 
 const n_puntos = 40;
 
@@ -26,8 +26,14 @@ function actualizarPasadas() {
     contenedor.innerHTML = "";
 
     pasadas_55.forEach((p) => {
+        /*tengo que meter búsqueda de palanquilla
+    
+
+        */
+
+
         let rTransVal = p.R_transfor_modificado !== undefined ? p.R_transfor_modificado : p.R_transfor;
-        let luzVal = p.Valor_luz_modificado !== undefined ? p.Valor_luz_modificado : p.Valor_luz;
+        let luzVal = p.Valor_luz_modificado !== undefined ? p.Valor_luz_modificado : p.Valor_luz.toFixed(0);
         let R_nom = (p.max_R_nom + p.min_R_nom) / 2;
         let areaSalidaTotal;
         
@@ -51,22 +57,37 @@ function actualizarPasadas() {
             console.log("R_nom",p.nombre,": ", R_nom);
             console.log("mu",p.nombre,": ",mu);*/
             rellenocuadrante = generarPerfilSalidaEkelundZheng(perfilCuadrante, rellenocuadrante, luzVal, R_nom, mu, n_puntos);
+            /* 
+                rellenocuadrante = generarPerfilSalidaEkelundZheng(perfilCuadrante, rellenocuadrante, luzVal, R_nom, mu, n_puntos);
+                rellenocuadrante = generarPerfilSalidaShinokura(perfilCuadrante, rellenocuadrante, luzVal, R_nom, alpha, n_puntos);
+                rellenocuadrante =generarPerfilSalidaTafelSedlaczek(perfilCuadrante, rellenocuadrante, luzVal, R_nom, n_puntos);
+                rellenocuadrante = generarPerfilSalidaKoncevicz(perfilCuadrante, rellenocuadrante, luzVal, R_nom, n_puntos);
+                rellenocuadrante = generarPerfilSalidaZheng(perfilCilindro, P_in, g, R_nom, m_material = 1.25, gamma = 0.97, maxIter = 3);
+                */
             areaSalidaTotal = calcularAreaDesdePuntos(rellenocuadrante.X, rellenocuadrante.Y);
             rTransVal = areaEntradaTotal/areaSalidaTotal ;
         } else {
             let alpha = 0.85;
-            console.log("rellenocuadrante",p.nombre,": ", rellenocuadrante);
+            /*console.log("rellenocuadrante",p.nombre,": ", rellenocuadrante);
             console.log("perfilCuadrante",p.nombre,": ", perfilCuadrante);
             console.log("luzVal",p.nombre,": ", luzVal);
             console.log("R_nom",p.nombre,": ", R_nom);
-            console.log("alpha",p.nombre,": ",alpha);
-            rellenocuadrante = generarPerfilSalidaShinokura(perfilCuadrante, rellenocuadrante, luzVal, R_nom, alpha, n_puntos);
-            
-            areaSalidaTotal = calcularAreaDesdePuntos(rellenocuadrante.X, rellenocuadrante.Y);            
-            rTransVal = areaEntradaTotal/areaSalidaTotal ;
-            if (p.nombre !="BH"){
+            console.log("alpha",p.nombre,": ",alpha);*/
+            if (p.nombre !="BH" && p.nombre !="CV" ){
             rellenocuadrante = rotarSalidaAEntrada(rellenocuadrante);
             }
+
+            rellenocuadrante = generarPerfilSalidaZheng(perfilCuadrante, rellenocuadrante, luzVal, R_nom, 1.25, (p.tipo === "redondo") ? 0.83 : 0.97, 3);
+            /* 
+                rellenocuadrante = generarPerfilSalidaShinokura(perfilCuadrante, rellenocuadrante, luzVal, R_nom, alpha, n_puntos);
+                rellenocuadrante =generarPerfilSalidaTafelSedlaczek(perfilCuadrante, rellenocuadrante, luzVal, R_nom, n_puntos);
+                rellenocuadrante = generarPerfilSalidaKoncevicz(perfilCuadrante, rellenocuadrante, luzVal, R_nom, n_puntos);
+                rellenocuadrante = generarPerfilSalidaZheng(perfilCuadrante, rellenocuadrante, luzVal, R_nom, 1.25, (p.tipo === "redondo") ? 0.83 : 0.97, 3);
+                */
+
+            areaSalidaTotal = calcularAreaDesdePuntos(rellenocuadrante.X, rellenocuadrante.Y);            
+            rTransVal = areaEntradaTotal/areaSalidaTotal ;
+            
         }
         
         let rellenoSimetrico = simetria(rellenocuadrante);
@@ -79,13 +100,17 @@ function actualizarPasadas() {
         const tipoCilindro = p.tipo || "AH";
         const areaEntradaFmt = areaEntradaTotal.toFixed(2);
         const areaSalidaFmt = areaSalidaTotal.toFixed(2);
-        const rTransFmt = rTransVal.toFixed(2);
+        const rTransFmt = rTransVal.toFixed(1);
 
         const xVals = (rellenoSimetrico && rellenoSimetrico.X_sup && rellenoSimetrico.X_sup.length > 0) ? rellenoSimetrico.X_sup : [0];
         const yVals = (rellenoSimetrico && rellenoSimetrico.Y_sup && rellenoSimetrico.Y_sup.length > 0) ? rellenoSimetrico.Y_sup : [0];
 
-        const anchomax = (Math.max(...xVals)).toFixed(2);
-        const altomax = (Math.max(...yVals) * 2).toFixed(2);
+        const anchomax = (Math.max(...xVals)).toFixed(0);
+        const altomax = (Math.max(...yVals) * 2).toFixed(0);
+
+        
+        const Luz_teor = p.Valor_luz.toFixed(0);
+        const R_teor = p.R_transfor.toFixed(1);
 
         card.innerHTML = `
             <h2>${p.nombre}</h2>
@@ -140,11 +165,11 @@ function actualizarPasadas() {
                             </tr>
                             <tr style="border-bottom: 1px solid #dee2e6;">
                                 <td style="padding: 6px 0; font-weight: bold; color: #495057;">R. Transformación:</td>
-                                <td style="padding: 6px 0; text-align: right; color: #212529;">${rTransFmt}</td>
+                                <td style="padding: 6px 0; text-align: right; color: #212529;">${rTransFmt} (${R_teor})</td>
                             </tr>
                             <tr style="border-bottom: 1px solid #dee2e6;">
                                 <td style="padding: 6px 0; font-weight: bold; color: #495057;">Luz:</td>
-                                <td style="padding: 6px 0; text-align: right; color: #212529;">${luzVal} mm</td>
+                                <td style="padding: 6px 0; text-align: right; color: #212529;">${luzVal} (${Luz_teor}) mm</td>
                             </tr>
                             <tr style="border-bottom: 1px solid #dee2e6;">
                                 <td style="padding: 6px 0; font-weight: bold; color: #495057;">Ancho de figura:</td>
